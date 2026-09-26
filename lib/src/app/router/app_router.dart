@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:oronbox/src/app/layout/app_navigation_bar.dart';
 import 'package:oronbox/src/app/layout/app_scaffold.dart';
 import 'package:oronbox/src/app/theme/app_theme.dart';
+import 'package:oronbox/src/app/widgets/app_scaffold_messenger.dart';
 import 'package:oronbox/src/app/widgets/dialog_helper.dart';
 import 'package:oronbox/src/core/providers/app_settings_providers.dart';
 import 'package:oronbox/src/data/community/community_source.dart';
@@ -19,10 +20,13 @@ import 'package:oronbox/src/features/devices/pages/more/zeppos_more_features_pag
 import 'package:oronbox/src/features/devices/pages/more/zeppos_xiao_ai_page.dart';
 import 'package:oronbox/src/features/devices/pages/more/zeppos_app_side_debug_page.dart';
 import 'package:oronbox/src/features/devices/pages/more/zeppos_app_settings_page.dart';
+import 'package:oronbox/src/features/devices/pages/more/zeppos_setting_viewer_page.dart';
 import 'package:oronbox/src/features/devices/pages/more/zeppos_music_upload_page.dart';
 import 'package:oronbox/src/features/devices/pages/more/xiaomi_recordings_page.dart';
 import 'package:oronbox/src/features/devices/pages/more/xiaomi_health_page.dart';
 import 'package:oronbox/src/features/devices/pages/more/xiaomi_health_detail_page.dart';
+import 'package:oronbox/src/features/devices/pages/more/xiaomi_health_debug_page.dart';
+import 'package:oronbox/src/features/devices/health/health_models.dart';
 import 'package:oronbox/src/features/devices/pages/more/xiaomi_device_settings_pages.dart';
 import 'package:oronbox/src/features/devices/pages/more/xiaomi_device_feature_pages.dart';
 import 'package:oronbox/src/features/devices/pages/more/zeppos_voice_memos_page.dart';
@@ -35,6 +39,7 @@ import 'package:oronbox/src/features/devices/providers/pending_shared_device_pro
 import 'package:oronbox/src/features/devices/services/device_share_link.dart';
 import 'package:oronbox/src/features/resources/pages/creator/creator_center_page.dart';
 import 'package:oronbox/src/features/resources/pages/creator/creator_resource_page.dart';
+import 'package:oronbox/src/features/resources/pages/creator/creator_review_status_page.dart';
 import 'package:oronbox/src/features/resources/pages/huami_publisher_page.dart';
 import 'package:oronbox/src/features/resources/pages/blog_post_page.dart';
 import 'package:oronbox/src/features/resources/pages/queue_page.dart';
@@ -124,9 +129,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/resources',
-                builder: (context, state) => const PrimaryBranchScaffold(
-                  child: ResourcesPage(),
-                ),
+                builder: (context, state) =>
+                    const PrimaryBranchScaffold(child: ResourcesPage()),
                 routes: [
                   GoRoute(
                     path: 'detail/:id',
@@ -166,7 +170,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                         reverseTransitionDuration: const Duration(
                           milliseconds: 300,
                         ),
-                        child: child,
+                        child: OronBoxScaffoldMessenger(child: child),
                         transitionsBuilder:
                             AppTheme.buildPlatformPageTransition,
                       );
@@ -208,17 +212,67 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   ),
                   GoRoute(
                     path: 'creator',
-                    builder: (context, state) => const CreatorCenterPage(),
+                    pageBuilder: (context, state) => CustomTransitionPage<void>(
+                      key: state.pageKey,
+                      transitionsBuilder: AppTheme.buildPlatformPageTransition,
+                      child: const CreatorCenterPage(),
+                    ),
                     routes: [
                       GoRoute(
-                        path: 'create',
-                        builder: (context, state) =>
-                            const CreatorCreateWizard(),
+                        path: 'resources',
+                        pageBuilder: (context, state) =>
+                            CustomTransitionPage<void>(
+                              key: state.pageKey,
+                              transitionsBuilder:
+                                  AppTheme.buildPlatformPageTransition,
+                              child: const CreatorCenterPage(initialTab: 1),
+                            ),
+                        routes: [
+                          GoRoute(
+                            path: 'create',
+                            builder: (context, state) =>
+                                const CreatorCreateWizard(),
+                          ),
+                          GoRoute(
+                            path: ':resourceId',
+                            builder: (context, state) => CreatorResourcePage(
+                              resourceId: state.pathParameters['resourceId'],
+                            ),
+                          ),
+                        ],
                       ),
                       GoRoute(
-                        path: 'resource',
-                        builder: (context, state) =>
-                            const CreatorResourcePage(),
+                        path: 'reviews',
+                        pageBuilder: (context, state) =>
+                            CustomTransitionPage<void>(
+                              key: state.pageKey,
+                              transitionsBuilder:
+                                  AppTheme.buildPlatformPageTransition,
+                              child: CreatorCenterPage(
+                                initialTab: 2,
+                                initialReviewFilter:
+                                    state.uri.queryParameters['filter'],
+                              ),
+                            ),
+                        routes: [
+                          GoRoute(
+                            path: ':reviewId',
+                            builder: (context, state) =>
+                                CreatorReviewStatusPage(
+                                  reviewId: state.pathParameters['reviewId']!,
+                                ),
+                          ),
+                        ],
+                      ),
+                      GoRoute(
+                        path: 'manage',
+                        pageBuilder: (context, state) =>
+                            CustomTransitionPage<void>(
+                              key: state.pageKey,
+                              transitionsBuilder:
+                                  AppTheme.buildPlatformPageTransition,
+                              child: const CreatorCenterPage(initialTab: 3),
+                            ),
                       ),
                       GoRoute(
                         path: 'collection/:id',
@@ -243,9 +297,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/devices',
-                builder: (context, state) => const PrimaryBranchScaffold(
-                  child: DevicesPage(),
-                ),
+                builder: (context, state) =>
+                    const PrimaryBranchScaffold(child: DevicesPage()),
                 routes: [
                   GoRoute(
                     path: 'switch',
@@ -263,7 +316,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                       reverseTransitionDuration: const Duration(
                         milliseconds: 300,
                       ),
-                      child: const DeviceFirmwarePage(),
+                      child: const OronBoxScaffoldMessenger(
+                        child: DeviceFirmwarePage(),
+                      ),
                       transitionsBuilder: AppTheme.buildPlatformPageTransition,
                     ),
                   ),
@@ -281,6 +336,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                   GoRoute(
                     path: 'apps',
                     builder: (context, state) => const DeviceAppsPage(),
+                    routes: [
+                      GoRoute(
+                        path: 'settings/:appId',
+                        redirect: (context, state) =>
+                            int.tryParse(state.pathParameters['appId'] ?? '') ==
+                                null
+                            ? '/devices/apps'
+                            : null,
+                        pageBuilder: (context, state) {
+                          final appId = int.parse(
+                            state.pathParameters['appId']!,
+                          );
+                          final title =
+                              state.uri.queryParameters['title'] ??
+                              '0x${appId.toRadixString(16).padLeft(8, '0')}';
+                          return CustomTransitionPage<void>(
+                            key: state.pageKey,
+                            transitionDuration: Duration.zero,
+                            reverseTransitionDuration: Duration.zero,
+                            child: ZeppOsSettingViewerPage(
+                              appId: appId,
+                              title: title,
+                            ),
+                            transitionsBuilder: (_, _, _, child) => child,
+                          );
+                        },
+                      ),
+                    ],
                   ),
                   GoRoute(
                     path: 'watchfaces',
@@ -301,13 +384,78 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                     routes: [
                       GoRoute(
                         path: 'detail',
-                        builder: (context, state) {
+                        pageBuilder: (context, state) {
                           final args = state.extra;
-                          if (args is! XiaomiHealthDetailArgs) {
-                            return const XiaomiHealthPage();
-                          }
-                          return XiaomiHealthDetailPage(args: args);
+                          final detailArgs = switch (args) {
+                            XiaomiHealthDetailArgs value => value,
+                            XiaomiHealthWorkoutRouteArgs value => value.health,
+                            _ => null,
+                          };
+                          final child = detailArgs == null
+                              ? const XiaomiHealthPage()
+                              : XiaomiHealthDetailPage(args: detailArgs);
+                          return CustomTransitionPage<void>(
+                            key: state.pageKey,
+                            transitionDuration: const Duration(
+                              milliseconds: 320,
+                            ),
+                            reverseTransitionDuration: const Duration(
+                              milliseconds: 300,
+                            ),
+                            child: OronBoxScaffoldMessenger(child: child),
+                            transitionsBuilder:
+                                AppTheme.buildPlatformPageTransition,
+                          );
                         },
+                        routes: [
+                          GoRoute(
+                            path: 'workout/:id',
+                            pageBuilder: (context, state) {
+                              final extra = state.extra;
+                              final preview = switch (extra) {
+                                XiaomiHealthWorkoutRouteArgs value =>
+                                  value.workout,
+                                HealthWorkoutSummary value => value,
+                                _ => null,
+                              };
+                              return CustomTransitionPage<void>(
+                                key: state.pageKey,
+                                transitionDuration: const Duration(
+                                  milliseconds: 320,
+                                ),
+                                reverseTransitionDuration: const Duration(
+                                  milliseconds: 300,
+                                ),
+                                child: OronBoxScaffoldMessenger(
+                                  child: XiaomiHealthWorkoutPage(
+                                    workoutId: state.pathParameters['id']!,
+                                    preview: preview,
+                                  ),
+                                ),
+                                transitionsBuilder:
+                                    AppTheme.buildPlatformPageTransition,
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                      GoRoute(
+                        path: 'debug',
+                        pageBuilder: (context, state) =>
+                            CustomTransitionPage<void>(
+                              key: state.pageKey,
+                              transitionDuration: const Duration(
+                                milliseconds: 320,
+                              ),
+                              reverseTransitionDuration: const Duration(
+                                milliseconds: 300,
+                              ),
+                              child: const OronBoxScaffoldMessenger(
+                                child: XiaomiHealthDebugPage(),
+                              ),
+                              transitionsBuilder:
+                                  AppTheme.buildPlatformPageTransition,
+                            ),
                       ),
                     ],
                   ),
@@ -365,9 +513,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/queue',
-                builder: (context, state) => const PrimaryBranchScaffold(
-                  child: QueuePage(),
-                ),
+                builder: (context, state) =>
+                    const PrimaryBranchScaffold(child: QueuePage()),
               ),
             ],
           ),
@@ -375,14 +522,42 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/plugins',
-                builder: (context, state) => const PrimaryBranchScaffold(
-                  child: PluginsPage(),
-                ),
+                builder: (context, state) =>
+                    const PrimaryBranchScaffold(child: PluginsPage()),
                 routes: [
                   GoRoute(
                     path: ':id',
                     builder: (context, state) =>
                         PluginDetailPage(pluginId: state.pathParameters['id']!),
+                    routes: [
+                      GoRoute(
+                        path: 'page',
+                        pageBuilder: (context, state) {
+                          final extra = state.extra;
+                          final args = extra is PluginUiRouteArgs
+                              ? extra
+                              : null;
+                          return CustomTransitionPage<void>(
+                            key: state.pageKey,
+                            transitionDuration: const Duration(
+                              milliseconds: 320,
+                            ),
+                            reverseTransitionDuration: const Duration(
+                              milliseconds: 300,
+                            ),
+                            child: OronBoxScaffoldMessenger(
+                              child: PluginUiPage(
+                                pluginId: state.pathParameters['id']!,
+                                preview: args?.nodes,
+                                title: args?.title ?? '',
+                              ),
+                            ),
+                            transitionsBuilder:
+                                AppTheme.buildPlatformPageTransition,
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -392,9 +567,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: '/settings',
-                builder: (context, state) => const PrimaryBranchScaffold(
-                  child: SettingsPage(),
-                ),
+                builder: (context, state) =>
+                    const PrimaryBranchScaffold(child: SettingsPage()),
                 routes: [
                   for (final category in SettingsCategory.values)
                     GoRoute(

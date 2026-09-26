@@ -339,6 +339,10 @@ String localizedErrorMessage(AppLocalizations l10n, Object? error) {
     return l10n.errorWebSerialUnavailable;
   }
 
+  if (normalized.contains('spp bond removal failed')) {
+    return l10n.errorSppBondRemovalFailed;
+  }
+
   if (normalized.contains('no rfcomm channel available')) {
     return l10n.errorUnknownWithDetail(_trimPlatformNoise(raw));
   }

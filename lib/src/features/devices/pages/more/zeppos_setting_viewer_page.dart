@@ -1,7 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:go_router/go_router.dart';
 import 'package:oronbox/src/app/generated/app_localizations.dart';
 import 'package:oronbox/src/app/utils/error_localization.dart';
 import 'package:oronbox/src/app/widgets/sys_app_bar.dart';
@@ -13,14 +14,23 @@ Future<void> showZeppOsAppSettings(
   required String title,
 }) async {
   if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-    await Navigator.of(context).push<void>(
-      PageRouteBuilder(
-        pageBuilder: (_, _, _) =>
-            ZeppOsSettingViewerPage(appId: appId, title: title),
-        transitionDuration: Duration.zero,
-        reverseTransitionDuration: Duration.zero,
-      ),
-    );
+    final location = Uri(
+      path: '/devices/apps/settings/$appId',
+      queryParameters: title.isEmpty ? null : {'title': title},
+    ).toString();
+    if (GoRouter.maybeOf(context) case final router?) {
+      await router.push<void>(location);
+    } else {
+      // Isolated/native hosts may not mount the application's GoRouter.
+      await Navigator.of(context).push<void>(
+        PageRouteBuilder(
+          pageBuilder: (_, _, _) =>
+              ZeppOsSettingViewerPage(appId: appId, title: title),
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+        ),
+      );
+    }
     return;
   }
   await ZeppOsAppSettingsService.instance.open(appId, title: title);

@@ -1,7 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -71,11 +71,20 @@ class SysAppBar extends ConsumerWidget implements PreferredSizeWidget {
         : actions;
     // Android-only debug entry: the settings toggle puts a bug button in
     // every app bar; desktop uses its separate debug window instead.
+    // `SysAppBar` is also used by pages pushed with a plain
+    // `MaterialPageRoute` (for example workout/resource details).  Calling
+    // `GoRouterState.of` for such a route loops forever in go_router:18,
+    // because it keeps looking for a `Page` route that does not exist.  Only
+    // ask go_router for its state when the current route is actually a Page.
+    final route = ModalRoute.of(context);
+    final routePath = route?.settings is Page<Object?>
+        ? GoRouterState.of(context).uri.path
+        : null;
     final showDebugEntry =
         !kIsWeb &&
         defaultTargetPlatform == TargetPlatform.android &&
         ref.watch(debugWindowEnabledProvider) &&
-        GoRouterState.of(context).uri.path != '/debug';
+        routePath != '/debug';
     final appBar = AppBar(
       title: resolvedTitle,
       leading: resolvedLeading,

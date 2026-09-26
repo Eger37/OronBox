@@ -1390,6 +1390,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get deviceHealthHeartRate => 'Пульс';
 
   @override
+  String get deviceHealthAverageHeartRateLabel => 'Средний пульс';
+
+  @override
   String get deviceHealthRestingHeartRate => 'Пульс в покое';
 
   @override
@@ -1433,6 +1436,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get deviceHealthSleepStructure => 'Структура сна';
+
+  @override
+  String get deviceHealthSleepDetails => 'Детали сна';
 
   @override
   String get deviceHealthSleepAverageHeartRate =>
@@ -4275,5 +4281,579 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String xiaomiScreenshotSaved(Object path) {
     return 'Снимок экрана часов сохранён в: $path';
+  }
+
+  @override
+  String get deviceHealthRecoveryTime => 'Восстановление';
+
+  @override
+  String get deviceHealthTodayLoad => 'Нагрузка сегодня';
+
+  @override
+  String get deviceHealthSevenDayLoad => 'Нагрузка за 7 дней';
+
+  @override
+  String get deviceHealthLoadLevel => 'Уровень нагрузки';
+
+  @override
+  String get deviceHealthFitnessBalance => 'Баланс формы';
+
+  @override
+  String get deviceHealthFitnessLevel => 'Форма';
+
+  @override
+  String get deviceHealthFatigueLevel => 'Усталость';
+
+  @override
+  String get deviceHealthTrainingStress => 'Тренировочный стресс';
+
+  @override
+  String get deviceHealthTrainingStatus => 'Статус тренировки';
+
+  @override
+  String get deviceHealthSevenDayVitality => 'Активность за 7 дней';
+
+  @override
+  String get deviceHealthEarnedToday => 'Заработано за день';
+
+  @override
+  String get deviceHealthEarnedInPeriod => 'Заработано за период';
+
+  @override
+  String get deviceHealthModerateIntensity => 'Средняя';
+
+  @override
+  String get deviceHealthHighIntensity => 'Высокая';
+
+  @override
+  String get deviceHealthNap => 'Дневной сон';
+
+  @override
+  String get deviceHealthNapSingular => 'Дневной сон';
+
+  @override
+  String get deviceHealthWorkoutOverview => 'Обзор тренировок';
+
+  @override
+  String get deviceHealthWorkoutHistory => 'История';
+
+  @override
+  String get deviceHealthWorkoutDuration => 'Длительность';
+
+  @override
+  String get deviceHealthWorkoutRoute => 'Маршрут';
+
+  @override
+  String get deviceHealthWorkoutDetails => 'Подробности';
+
+  @override
+  String get deviceHealthSwimmingSections => 'Секции плавания';
+
+  @override
+  String get deviceHealthWorkoutCharts => 'Графики тренировки';
+
+  @override
+  String get deviceHealthActiveDuration => 'Активное время';
+
+  @override
+  String get deviceHealthAveragePace => 'Средний темп';
+
+  @override
+  String get deviceHealthBestPace => 'Лучший темп';
+
+  @override
+  String get deviceHealthHeartRateRange => 'Диапазон пульса';
+
+  @override
+  String get deviceHealthBloodOxygenRange => 'Диапазон SpO2';
+
+  @override
+  String get deviceHealthMainStroke => 'Основной стиль';
+
+  @override
+  String get deviceHealthHeartRateZones => 'Зоны пульса';
+
+  @override
+  String deviceHealthZoneLabel(Object zone) {
+    return 'Зона $zone';
+  }
+
+  @override
+  String get deviceHealthZoneWarmup => 'Разминка';
+
+  @override
+  String get deviceHealthZoneFatBurning => 'Жиросжигание';
+
+  @override
+  String get deviceHealthZoneAerobic => 'Аэробная';
+
+  @override
+  String get deviceHealthZoneAnaerobic => 'Анаэробная';
+
+  @override
+  String get deviceHealthZoneExtreme => 'Предельная';
+
+  @override
+  String get deviceHealthRecoveryAfterWorkout => 'Восстановление пульса';
+
+  @override
+  String get deviceHealthRecoveredHeartRate => 'Пульс восстановления';
+
+  @override
+  String get deviceHealthRecoveryRate => 'Скорость восстановления';
+
+  @override
+  String get deviceHealthSamples => 'Точки';
+
+  @override
+  String get deviceHealthAverageSpeed => 'Средняя скорость';
+
+  @override
+  String get deviceHealthTopSpeed => 'Макс. скорость';
+
+  @override
+  String get deviceHealthAverageStride => 'Средний шаг';
+
+  @override
+  String get deviceHealthAverageCadence => 'Средняя каденция';
+
+  @override
+  String get deviceHealthMaximumCadence => 'Макс. каденция';
+
+  @override
+  String get deviceHealthAverageBloodOxygenDetail => 'Средний SpO2';
+
+  @override
+  String get deviceHealthTotalAscent => 'Общий подъём';
+
+  @override
+  String get deviceHealthTotalDescent => 'Общий спуск';
+
+  @override
+  String get deviceHealthAverageAltitude => 'Средняя высота';
+
+  @override
+  String get deviceHealthAerobicEffect => 'Аэробный эффект';
+
+  @override
+  String get deviceHealthAnaerobicEffect => 'Анаэробный эффект';
+
+  @override
+  String get deviceHealthPeakEffect => 'Пиковый эффект';
+
+  @override
+  String get deviceHealthVo2Max => 'VO₂ max';
+
+  @override
+  String get deviceHealthBodyEnergyUsed => 'Расход энергии';
+
+  @override
+  String get deviceHealthExpectedRecovery => 'Ожидаемое восстановление';
+
+  @override
+  String get deviceHealthTrainingLoad => 'Тренировочная нагрузка';
+
+  @override
+  String get deviceHealthVitalityEarned => 'Заработанная активность';
+
+  @override
+  String get deviceHealthAveragePower => 'Средняя мощность';
+
+  @override
+  String get deviceHealthMaximumPower => 'Макс. мощность';
+
+  @override
+  String get deviceHealthArmPulls => 'Гребки';
+
+  @override
+  String get deviceHealthAverageStrokeRate => 'Средний темп гребка';
+
+  @override
+  String get deviceHealthMaximumStrokeRate => 'Макс. темп гребка';
+
+  @override
+  String get deviceHealthTurns => 'Повороты';
+
+  @override
+  String get deviceHealthAverageSwolf => 'Средний SWOLF';
+
+  @override
+  String get deviceHealthBestSwolf => 'Лучший SWOLF';
+
+  @override
+  String get deviceHealthPoolLength => 'Длина бассейна';
+
+  @override
+  String get deviceHealthJumps => 'Прыжки';
+
+  @override
+  String get deviceHealthAverageJumpRate => 'Средняя частота прыжков';
+
+  @override
+  String get deviceHealthBestJumpRate => 'Лучшая частота прыжков';
+
+  @override
+  String get deviceHealthTrips => 'Спотыкания';
+
+  @override
+  String get deviceHealthSets => 'Подходы';
+
+  @override
+  String get deviceHealthTotalStrokes => 'Всего гребков';
+
+  @override
+  String get deviceHealthAverageRowingRate => 'Средний темп гребли';
+
+  @override
+  String get deviceHealthBestRowingRate => 'Лучший темп гребли';
+
+  @override
+  String get deviceHealthChartHeartRate => 'Пульс';
+
+  @override
+  String get deviceHealthChartCadence => 'Каденция';
+
+  @override
+  String get deviceHealthChartPace => 'Темп';
+
+  @override
+  String get deviceHealthChartSpeed => 'Скорость';
+
+  @override
+  String get deviceHealthChartPower => 'Мощность';
+
+  @override
+  String get deviceHealthChartStrokeRate => 'Темп гребка';
+
+  @override
+  String get deviceHealthChartJumpRate => 'Частота прыжков';
+
+  @override
+  String get deviceHealthChartBloodOxygen => 'SpO2';
+
+  @override
+  String get deviceHealthChartStress => 'Стресс';
+
+  @override
+  String get deviceHealthWorkoutOutdoorRunning => 'Бег на улице';
+
+  @override
+  String get deviceHealthWorkoutOutdoorWalking => 'Ходьба на улице';
+
+  @override
+  String get deviceHealthWorkoutIndoorRunning => 'Бег в помещении';
+
+  @override
+  String get deviceHealthWorkoutMountaineering => 'Восхождение';
+
+  @override
+  String get deviceHealthWorkoutTrailRunning => 'Трейлраннинг';
+
+  @override
+  String get deviceHealthWorkoutOutdoorCycling => 'Велоспорт на улице';
+
+  @override
+  String get deviceHealthWorkoutIndoorCycling => 'Велоспорт в помещении';
+
+  @override
+  String get deviceHealthWorkoutFreeTraining => 'Свободная тренировка';
+
+  @override
+  String get deviceHealthWorkoutSwimming => 'Плавание';
+
+  @override
+  String get deviceHealthWorkoutElliptical => 'Эллиптический';
+
+  @override
+  String get deviceHealthWorkoutRowing => 'Гребля';
+
+  @override
+  String get deviceHealthWorkoutJumpRope => 'Скакалка';
+
+  @override
+  String get deviceHealthWorkoutHiking => 'Поход';
+
+  @override
+  String get deviceHealthWorkoutGeneric => 'Тренировка';
+
+  @override
+  String get deviceHealthStrokeMedley => 'Комбинированный';
+
+  @override
+  String get deviceHealthStrokeBreaststroke => 'Брасс';
+
+  @override
+  String get deviceHealthStrokeFreestyle => 'Кроль';
+
+  @override
+  String get deviceHealthStrokeBackstroke => 'На спине';
+
+  @override
+  String get deviceHealthStrokeButterfly => 'Баттерфляй';
+
+  @override
+  String get deviceHealthSectionLabel => 'Секция';
+
+  @override
+  String deviceHealthVitalityRunSuggestion(Object minutes) {
+    return 'Бег $minutes мин до следующей цели';
+  }
+
+  @override
+  String deviceHealthVitalityActiveMinutes(Object minutes) {
+    return 'Ещё $minutes мин активности до цели';
+  }
+
+  @override
+  String get deviceHealthLatestHeartRate => 'Последний пульс';
+
+  @override
+  String get deviceHealthLatestBloodOxygen => 'Последний SpO2';
+
+  @override
+  String get deviceHealthLatestStress => 'Последний стресс';
+
+  @override
+  String get deviceHealthDebugModeTitle => 'Режим разработки здоровья';
+
+  @override
+  String get deviceHealthDebugModeDescription =>
+      'Включить снимки данных о здоровье и перезагрузку';
+
+  @override
+  String get deviceHealthDebugSnapshots => 'Снимки';
+
+  @override
+  String get deviceHealthDebugSnapshotList => 'Список снимков';
+
+  @override
+  String get deviceHealthDebugSnapshotsDescription =>
+      'Сохранённые исходные файлы активности можно воспроизвести без часов';
+
+  @override
+  String get deviceHealthDebugRefresh => 'Обновить';
+
+  @override
+  String get deviceHealthDebugRefreshDescription =>
+      'Перечитать сохранённый список снимков';
+
+  @override
+  String get deviceHealthDebugClearAll => 'Очистить всё';
+
+  @override
+  String get deviceHealthDebugClearAllDescription =>
+      'Удалить все сохранённые снимки здоровья';
+
+  @override
+  String get deviceHealthDebugNoSnapshots => 'Снимков пока нет';
+
+  @override
+  String get deviceHealthDebugReload => 'Воспроизвести';
+
+  @override
+  String get deviceHealthDebugReloaded => 'Снимок воспроизведён';
+
+  @override
+  String deviceHealthDebugFiles(Object count) {
+    return 'Файлов: $count';
+  }
+
+  @override
+  String get creatorAccounts => 'Аккаунты';
+
+  @override
+  String get creatorPendingItems => 'Требуют внимания';
+
+  @override
+  String get creatorResourceStatus => 'Статус ресурсов';
+
+  @override
+  String get creatorOverview => 'Обзор';
+
+  @override
+  String get creatorManage => 'Управление';
+
+  @override
+  String get creatorManageUnavailable => 'Управление недоступно';
+
+  @override
+  String get creatorReviewTab => 'Проверка';
+
+  @override
+  String get creatorReviewQueue => 'Очередь проверки';
+
+  @override
+  String get creatorReviewStatus => 'Статус проверки';
+
+  @override
+  String get creatorReviewActive => 'Активные';
+
+  @override
+  String get creatorReviewChangesRequested => 'Требуются изменения';
+
+  @override
+  String get creatorReviewDeclined => 'Отклонено';
+
+  @override
+  String get creatorReviewClosed => 'Закрыто';
+
+  @override
+  String get creatorReviewFixedPending => 'Исправлено, ожидает проверки';
+
+  @override
+  String get creatorNoPendingReviews => 'Нет проверок в ожидании';
+
+  @override
+  String get creatorNoReviews => 'Нет проверок';
+
+  @override
+  String get creatorNeedsChanges => 'Требуются изменения';
+
+  @override
+  String get creatorConnected => 'Подключено';
+
+  @override
+  String get creatorNotConnected => 'Не подключено';
+
+  @override
+  String get creatorCenterExitTitle => 'Выйти из центра авторов';
+
+  @override
+  String get creatorCenterExitMessage => 'Выйти из центра авторов?';
+
+  @override
+  String get creatorEditComment => 'Изменить комментарий';
+
+  @override
+  String get creatorReply => 'Ответить';
+
+  @override
+  String creatorReplyingTo(Object id) {
+    return 'Ответ на #$id';
+  }
+
+  @override
+  String creatorReplyPrefix(Object id) {
+    return 'Ответ #$id: ';
+  }
+
+  @override
+  String get creatorSupplement => 'Дополнительно';
+
+  @override
+  String get creatorModifyResource => 'Изменить ресурс';
+
+  @override
+  String get creatorAstroBoxReview => 'Проверка AstroBox';
+
+  @override
+  String get creatorGithubPr => 'Репозиторий и PR GitHub';
+
+  @override
+  String get creatorApplyChanges => 'Применить изменения';
+
+  @override
+  String get creatorUpdatedAt => 'Обновлено';
+
+  @override
+  String get creatorSubmittedAt => 'Отправлено';
+
+  @override
+  String get creatorPublicationStatus => 'Статус публикации';
+
+  @override
+  String get creatorStageInfo => 'Редактирование';
+
+  @override
+  String get creatorStageFiles => 'Привязка файлов';
+
+  @override
+  String get creatorStagePublish => 'Публикация';
+
+  @override
+  String get creatorNextStep => 'Далее';
+
+  @override
+  String get creatorWatchfaceMissingId =>
+      'Не удалось распознать циферблат или он нулевой: нет ID, загрузка невозможна';
+
+  @override
+  String get creatorWatchfaceZeroIdTitle =>
+      'Обнаружен нулевой ID циферблата, измените его перед загрузкой';
+
+  @override
+  String get creatorWatchfacePayloadTooShort =>
+      'Файл циферблата слишком мал, чтобы содержать поле ID';
+
+  @override
+  String get creatorQuickAppMissingPackage =>
+      'Не удалось распознать мини-приложение: нет имени пакета, загрузка невозможна';
+
+  @override
+  String get creatorVelajsDefaultPackage =>
+      'Обнаружено имя пакета мини-приложения com.application.watch.demo — это значение по умолчанию проекта VelaJS, измените его перед загрузкой';
+
+  @override
+  String get creatorFilteredSupport => 'Поддержка отфильтрована';
+
+  @override
+  String get creatorSkippedPublication => 'Публикация пропущена';
+
+  @override
+  String get creatorAstroBoxUnsupportedDevicesNotice =>
+      'Некоторые выбранные поддерживаемые устройства пока не поддерживают публикацию в AstroBox; их заявления о поддержке будут отфильтрованы';
+
+  @override
+  String get creatorBandBbsUnsupportedDevicesNotice =>
+      'Некоторые выбранные поддерживаемые устройства пока не поддерживают публикацию в BandBBS; их публикация будет пропущена';
+
+  @override
+  String get errorSppBondRemovalFailed =>
+      'В Android ниже 11 removeBond не поддерживается системой. Если устройство часто отключается, переключитесь на другое устройство в Xiaomi Fitness или отключите разрешение «Устройства поблизости»';
+
+  @override
+  String get viewAllResources => 'Показать все';
+
+  @override
+  String get deviceHealthMinimum => 'Минимум';
+
+  @override
+  String get deviceHealthMaximum => 'Максимум';
+
+  @override
+  String get deviceHealthResting => 'Покой';
+
+  @override
+  String get deviceHealthDebugExport => 'Экспорт снимка';
+
+  @override
+  String get deviceHealthDebugExportTooltip =>
+      'Экспортировать необработанные файлы активности';
+
+  @override
+  String deviceHealthDebugExported(String path) {
+    return 'Экспортировано в $path';
+  }
+
+  @override
+  String deviceHealthDebugExportFailed(String error) {
+    return 'Не удалось экспортировать снимок: $error';
+  }
+
+  @override
+  String get deviceHealthDebugImport => 'Импорт';
+
+  @override
+  String get deviceHealthDebugImportDescription =>
+      'Импортировать ранее экспортированный файл снимка';
+
+  @override
+  String deviceHealthDebugImported(String deviceCode, int files) {
+    return 'Импортирован $deviceCode ($files файлов)';
+  }
+
+  @override
+  String deviceHealthDebugImportFailed(String error) {
+    return 'Не удалось импортировать снимок: $error';
   }
 }

@@ -61,6 +61,20 @@ void main() {
       expect(localizedErrorMessage(en, raw), en.errorBluetoothUnavailable);
     });
 
+    test('maps SPP bond removal failures to actionable guidance', () {
+      const raw =
+          'SPP bond removal failed: removeBond() was rejected; bondState=12';
+
+      expect(
+        localizedErrorMessage(en, raw),
+        en.errorSppBondRemovalFailed,
+      );
+      expect(
+        localizedErrorMessage(zh, raw),
+        zh.errorSppBondRemovalFailed,
+      );
+    });
+
     test('does not swallow generic timeouts', () {
       const raw = 'TimeoutException after 0:00:05.000000: Future not completed';
 

@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:oronbox/src/app/generated/app_localizations.dart';
+import 'package:oronbox/src/app/app_localizations_delegates.dart';
 import 'package:oronbox/src/commands/command_protocol.dart';
 import 'package:oronbox/src/core/services/shared_prefs_service.dart';
 import 'package:oronbox/src/features/oobe/oobe_state.dart';
@@ -44,7 +45,7 @@ Widget _wrap(Widget child, {GoRouter? router}) {
     overrides: [applicationHostProvider.overrideWithValue(_FakeHostBus())],
     child: MaterialApp.router(
       locale: const Locale('zh'),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: appLocalizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: effectiveRouter,
     ),
@@ -141,10 +142,7 @@ void main() {
       }
     }
 
-    expect(
-      tester.widget<Checkbox>(find.byType(Checkbox)).onChanged,
-      isNotNull,
-    );
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).onChanged, isNotNull);
     expect(find.text('请阅读并滚动到底部'), findsNothing);
 
     await tester.tap(find.byType(Checkbox));

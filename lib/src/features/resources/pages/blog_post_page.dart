@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +7,7 @@ import 'package:oronbox/src/app/utils/error_localization.dart';
 import 'package:oronbox/src/app/widgets/network_img_layer.dart';
 import 'package:oronbox/src/app/widgets/page_container.dart';
 import 'package:oronbox/src/app/widgets/sys_app_bar.dart';
+import 'package:oronbox/src/app/widgets/markdown_style_sheet.dart';
 import 'package:oronbox/src/core/constants/oronbox_server.dart';
 import 'package:oronbox/src/core/constants/style_constants.dart';
 import 'package:oronbox/src/data/community/community_source.dart';
@@ -62,7 +63,7 @@ class _BlogPostBody extends StatelessWidget {
 
   List<Widget> _contentSegments(BuildContext context) {
     final theme = Theme.of(context);
-    final styleSheet = MarkdownStyleSheet.fromTheme(theme).copyWith(
+    final styleSheet = markdownStyleSheetFromTheme(theme).copyWith(
       p: theme.textTheme.bodyMedium?.copyWith(height: 1.6),
       pPadding: const EdgeInsets.only(bottom: 12),
       h1: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
@@ -373,9 +374,8 @@ class _EmbeddedResourceSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(
-      context,
-    ).colorScheme.onSurfaceVariant.withValues(alpha: .12);
+    final color = Theme.of(context).colorScheme.onSurfaceVariant
+        .withValues(alpha: .12);
     Widget bar(double width, double height) => Container(
       width: width,
       height: height,

@@ -2521,6 +2521,12 @@ abstract class AppLocalizations {
   /// **'Heart rate'**
   String get deviceHealthHeartRate;
 
+  /// No description provided for @deviceHealthAverageHeartRateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Average heart rate'**
+  String get deviceHealthAverageHeartRateLabel;
+
   /// No description provided for @deviceHealthRestingHeartRate.
   ///
   /// In en, this message translates to:
@@ -2610,6 +2616,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sleep structure'**
   String get deviceHealthSleepStructure;
+
+  /// No description provided for @deviceHealthSleepDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleep details'**
+  String get deviceHealthSleepDetails;
 
   /// No description provided for @deviceHealthSleepAverageHeartRate.
   ///
@@ -7677,6 +7689,1086 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Watch screenshot saved to: {path}'**
   String xiaomiScreenshotSaved(Object path);
+
+  /// No description provided for @deviceHealthRecoveryTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery'**
+  String get deviceHealthRecoveryTime;
+
+  /// No description provided for @deviceHealthTodayLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Today load'**
+  String get deviceHealthTodayLoad;
+
+  /// No description provided for @deviceHealthSevenDayLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'7-day load'**
+  String get deviceHealthSevenDayLoad;
+
+  /// No description provided for @deviceHealthLoadLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Load level'**
+  String get deviceHealthLoadLevel;
+
+  /// No description provided for @deviceHealthFitnessBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Fitness balance'**
+  String get deviceHealthFitnessBalance;
+
+  /// No description provided for @deviceHealthFitnessLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fitness'**
+  String get deviceHealthFitnessLevel;
+
+  /// No description provided for @deviceHealthFatigueLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fatigue'**
+  String get deviceHealthFatigueLevel;
+
+  /// No description provided for @deviceHealthTrainingStress.
+  ///
+  /// In en, this message translates to:
+  /// **'Training stress'**
+  String get deviceHealthTrainingStress;
+
+  /// No description provided for @deviceHealthTrainingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Training status'**
+  String get deviceHealthTrainingStatus;
+
+  /// No description provided for @deviceHealthSevenDayVitality.
+  ///
+  /// In en, this message translates to:
+  /// **'7-day vitality'**
+  String get deviceHealthSevenDayVitality;
+
+  /// No description provided for @deviceHealthEarnedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned on this day'**
+  String get deviceHealthEarnedToday;
+
+  /// No description provided for @deviceHealthEarnedInPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Earned in this period'**
+  String get deviceHealthEarnedInPeriod;
+
+  /// No description provided for @deviceHealthModerateIntensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Moderate'**
+  String get deviceHealthModerateIntensity;
+
+  /// No description provided for @deviceHealthHighIntensity.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get deviceHealthHighIntensity;
+
+  /// No description provided for @deviceHealthNap.
+  ///
+  /// In en, this message translates to:
+  /// **'Naps'**
+  String get deviceHealthNap;
+
+  /// No description provided for @deviceHealthNapSingular.
+  ///
+  /// In en, this message translates to:
+  /// **'Nap'**
+  String get deviceHealthNapSingular;
+
+  /// No description provided for @deviceHealthWorkoutOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Workout overview'**
+  String get deviceHealthWorkoutOverview;
+
+  /// No description provided for @deviceHealthWorkoutHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get deviceHealthWorkoutHistory;
+
+  /// No description provided for @deviceHealthWorkoutDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get deviceHealthWorkoutDuration;
+
+  /// No description provided for @deviceHealthWorkoutRoute.
+  ///
+  /// In en, this message translates to:
+  /// **'Route'**
+  String get deviceHealthWorkoutRoute;
+
+  /// No description provided for @deviceHealthWorkoutDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get deviceHealthWorkoutDetails;
+
+  /// No description provided for @deviceHealthSwimmingSections.
+  ///
+  /// In en, this message translates to:
+  /// **'Swimming sections'**
+  String get deviceHealthSwimmingSections;
+
+  /// No description provided for @deviceHealthWorkoutCharts.
+  ///
+  /// In en, this message translates to:
+  /// **'Workout charts'**
+  String get deviceHealthWorkoutCharts;
+
+  /// No description provided for @deviceHealthActiveDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Active duration'**
+  String get deviceHealthActiveDuration;
+
+  /// No description provided for @deviceHealthAveragePace.
+  ///
+  /// In en, this message translates to:
+  /// **'Average pace'**
+  String get deviceHealthAveragePace;
+
+  /// No description provided for @deviceHealthBestPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Best pace'**
+  String get deviceHealthBestPace;
+
+  /// No description provided for @deviceHealthHeartRateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Heart-rate range'**
+  String get deviceHealthHeartRateRange;
+
+  /// No description provided for @deviceHealthBloodOxygenRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood oxygen range'**
+  String get deviceHealthBloodOxygenRange;
+
+  /// No description provided for @deviceHealthMainStroke.
+  ///
+  /// In en, this message translates to:
+  /// **'Main stroke'**
+  String get deviceHealthMainStroke;
+
+  /// No description provided for @deviceHealthHeartRateZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Heart-rate zones'**
+  String get deviceHealthHeartRateZones;
+
+  /// No description provided for @deviceHealthZoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Zone {zone}'**
+  String deviceHealthZoneLabel(Object zone);
+
+  /// No description provided for @deviceHealthZoneWarmup.
+  ///
+  /// In en, this message translates to:
+  /// **'Warm-up'**
+  String get deviceHealthZoneWarmup;
+
+  /// No description provided for @deviceHealthZoneFatBurning.
+  ///
+  /// In en, this message translates to:
+  /// **'Fat burning'**
+  String get deviceHealthZoneFatBurning;
+
+  /// No description provided for @deviceHealthZoneAerobic.
+  ///
+  /// In en, this message translates to:
+  /// **'Aerobic'**
+  String get deviceHealthZoneAerobic;
+
+  /// No description provided for @deviceHealthZoneAnaerobic.
+  ///
+  /// In en, this message translates to:
+  /// **'Anaerobic'**
+  String get deviceHealthZoneAnaerobic;
+
+  /// No description provided for @deviceHealthZoneExtreme.
+  ///
+  /// In en, this message translates to:
+  /// **'Extreme'**
+  String get deviceHealthZoneExtreme;
+
+  /// No description provided for @deviceHealthRecoveryAfterWorkout.
+  ///
+  /// In en, this message translates to:
+  /// **'Heart-rate recovery'**
+  String get deviceHealthRecoveryAfterWorkout;
+
+  /// No description provided for @deviceHealthRecoveredHeartRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovered HR'**
+  String get deviceHealthRecoveredHeartRate;
+
+  /// No description provided for @deviceHealthRecoveryRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery rate'**
+  String get deviceHealthRecoveryRate;
+
+  /// No description provided for @deviceHealthSamples.
+  ///
+  /// In en, this message translates to:
+  /// **'Samples'**
+  String get deviceHealthSamples;
+
+  /// No description provided for @deviceHealthAverageSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Average speed'**
+  String get deviceHealthAverageSpeed;
+
+  /// No description provided for @deviceHealthTopSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Top speed'**
+  String get deviceHealthTopSpeed;
+
+  /// No description provided for @deviceHealthAverageStride.
+  ///
+  /// In en, this message translates to:
+  /// **'Average stride'**
+  String get deviceHealthAverageStride;
+
+  /// No description provided for @deviceHealthAverageCadence.
+  ///
+  /// In en, this message translates to:
+  /// **'Average cadence'**
+  String get deviceHealthAverageCadence;
+
+  /// No description provided for @deviceHealthMaximumCadence.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum cadence'**
+  String get deviceHealthMaximumCadence;
+
+  /// No description provided for @deviceHealthAverageBloodOxygenDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Average blood oxygen'**
+  String get deviceHealthAverageBloodOxygenDetail;
+
+  /// No description provided for @deviceHealthTotalAscent.
+  ///
+  /// In en, this message translates to:
+  /// **'Total ascent'**
+  String get deviceHealthTotalAscent;
+
+  /// No description provided for @deviceHealthTotalDescent.
+  ///
+  /// In en, this message translates to:
+  /// **'Total descent'**
+  String get deviceHealthTotalDescent;
+
+  /// No description provided for @deviceHealthAverageAltitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Average altitude'**
+  String get deviceHealthAverageAltitude;
+
+  /// No description provided for @deviceHealthAerobicEffect.
+  ///
+  /// In en, this message translates to:
+  /// **'Aerobic effect'**
+  String get deviceHealthAerobicEffect;
+
+  /// No description provided for @deviceHealthAnaerobicEffect.
+  ///
+  /// In en, this message translates to:
+  /// **'Anaerobic effect'**
+  String get deviceHealthAnaerobicEffect;
+
+  /// No description provided for @deviceHealthPeakEffect.
+  ///
+  /// In en, this message translates to:
+  /// **'Peak effect'**
+  String get deviceHealthPeakEffect;
+
+  /// No description provided for @deviceHealthVo2Max.
+  ///
+  /// In en, this message translates to:
+  /// **'VO₂ max'**
+  String get deviceHealthVo2Max;
+
+  /// No description provided for @deviceHealthBodyEnergyUsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Body energy used'**
+  String get deviceHealthBodyEnergyUsed;
+
+  /// No description provided for @deviceHealthExpectedRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'Recovery'**
+  String get deviceHealthExpectedRecovery;
+
+  /// No description provided for @deviceHealthTrainingLoad.
+  ///
+  /// In en, this message translates to:
+  /// **'Training load'**
+  String get deviceHealthTrainingLoad;
+
+  /// No description provided for @deviceHealthVitalityEarned.
+  ///
+  /// In en, this message translates to:
+  /// **'Vitality earned'**
+  String get deviceHealthVitalityEarned;
+
+  /// No description provided for @deviceHealthAveragePower.
+  ///
+  /// In en, this message translates to:
+  /// **'Average power'**
+  String get deviceHealthAveragePower;
+
+  /// No description provided for @deviceHealthMaximumPower.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum power'**
+  String get deviceHealthMaximumPower;
+
+  /// No description provided for @deviceHealthArmPulls.
+  ///
+  /// In en, this message translates to:
+  /// **'Arm pulls'**
+  String get deviceHealthArmPulls;
+
+  /// No description provided for @deviceHealthAverageStrokeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Average stroke rate'**
+  String get deviceHealthAverageStrokeRate;
+
+  /// No description provided for @deviceHealthMaximumStrokeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum stroke rate'**
+  String get deviceHealthMaximumStrokeRate;
+
+  /// No description provided for @deviceHealthTurns.
+  ///
+  /// In en, this message translates to:
+  /// **'Turns'**
+  String get deviceHealthTurns;
+
+  /// No description provided for @deviceHealthAverageSwolf.
+  ///
+  /// In en, this message translates to:
+  /// **'Average SWOLF'**
+  String get deviceHealthAverageSwolf;
+
+  /// No description provided for @deviceHealthBestSwolf.
+  ///
+  /// In en, this message translates to:
+  /// **'Best SWOLF'**
+  String get deviceHealthBestSwolf;
+
+  /// No description provided for @deviceHealthPoolLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Pool length'**
+  String get deviceHealthPoolLength;
+
+  /// No description provided for @deviceHealthJumps.
+  ///
+  /// In en, this message translates to:
+  /// **'Jumps'**
+  String get deviceHealthJumps;
+
+  /// No description provided for @deviceHealthAverageJumpRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Average jump rate'**
+  String get deviceHealthAverageJumpRate;
+
+  /// No description provided for @deviceHealthBestJumpRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Best jump rate'**
+  String get deviceHealthBestJumpRate;
+
+  /// No description provided for @deviceHealthTrips.
+  ///
+  /// In en, this message translates to:
+  /// **'Trips'**
+  String get deviceHealthTrips;
+
+  /// No description provided for @deviceHealthSets.
+  ///
+  /// In en, this message translates to:
+  /// **'Sets'**
+  String get deviceHealthSets;
+
+  /// No description provided for @deviceHealthTotalStrokes.
+  ///
+  /// In en, this message translates to:
+  /// **'Total strokes'**
+  String get deviceHealthTotalStrokes;
+
+  /// No description provided for @deviceHealthAverageRowingRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Average rowing rate'**
+  String get deviceHealthAverageRowingRate;
+
+  /// No description provided for @deviceHealthBestRowingRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Best rowing rate'**
+  String get deviceHealthBestRowingRate;
+
+  /// No description provided for @deviceHealthChartHeartRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Heart rate'**
+  String get deviceHealthChartHeartRate;
+
+  /// No description provided for @deviceHealthChartCadence.
+  ///
+  /// In en, this message translates to:
+  /// **'Cadence'**
+  String get deviceHealthChartCadence;
+
+  /// No description provided for @deviceHealthChartPace.
+  ///
+  /// In en, this message translates to:
+  /// **'Pace'**
+  String get deviceHealthChartPace;
+
+  /// No description provided for @deviceHealthChartSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Speed'**
+  String get deviceHealthChartSpeed;
+
+  /// No description provided for @deviceHealthChartPower.
+  ///
+  /// In en, this message translates to:
+  /// **'Power'**
+  String get deviceHealthChartPower;
+
+  /// No description provided for @deviceHealthChartStrokeRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Stroke rate'**
+  String get deviceHealthChartStrokeRate;
+
+  /// No description provided for @deviceHealthChartJumpRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump rate'**
+  String get deviceHealthChartJumpRate;
+
+  /// No description provided for @deviceHealthChartBloodOxygen.
+  ///
+  /// In en, this message translates to:
+  /// **'Blood oxygen'**
+  String get deviceHealthChartBloodOxygen;
+
+  /// No description provided for @deviceHealthChartStress.
+  ///
+  /// In en, this message translates to:
+  /// **'Stress'**
+  String get deviceHealthChartStress;
+
+  /// No description provided for @deviceHealthWorkoutOutdoorRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Outdoor running'**
+  String get deviceHealthWorkoutOutdoorRunning;
+
+  /// No description provided for @deviceHealthWorkoutOutdoorWalking.
+  ///
+  /// In en, this message translates to:
+  /// **'Outdoor walking'**
+  String get deviceHealthWorkoutOutdoorWalking;
+
+  /// No description provided for @deviceHealthWorkoutIndoorRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Indoor running'**
+  String get deviceHealthWorkoutIndoorRunning;
+
+  /// No description provided for @deviceHealthWorkoutMountaineering.
+  ///
+  /// In en, this message translates to:
+  /// **'Mountaineering'**
+  String get deviceHealthWorkoutMountaineering;
+
+  /// No description provided for @deviceHealthWorkoutTrailRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Trail running'**
+  String get deviceHealthWorkoutTrailRunning;
+
+  /// No description provided for @deviceHealthWorkoutOutdoorCycling.
+  ///
+  /// In en, this message translates to:
+  /// **'Outdoor cycling'**
+  String get deviceHealthWorkoutOutdoorCycling;
+
+  /// No description provided for @deviceHealthWorkoutIndoorCycling.
+  ///
+  /// In en, this message translates to:
+  /// **'Indoor cycling'**
+  String get deviceHealthWorkoutIndoorCycling;
+
+  /// No description provided for @deviceHealthWorkoutFreeTraining.
+  ///
+  /// In en, this message translates to:
+  /// **'Free training'**
+  String get deviceHealthWorkoutFreeTraining;
+
+  /// No description provided for @deviceHealthWorkoutSwimming.
+  ///
+  /// In en, this message translates to:
+  /// **'Swimming'**
+  String get deviceHealthWorkoutSwimming;
+
+  /// No description provided for @deviceHealthWorkoutElliptical.
+  ///
+  /// In en, this message translates to:
+  /// **'Elliptical'**
+  String get deviceHealthWorkoutElliptical;
+
+  /// No description provided for @deviceHealthWorkoutRowing.
+  ///
+  /// In en, this message translates to:
+  /// **'Rowing'**
+  String get deviceHealthWorkoutRowing;
+
+  /// No description provided for @deviceHealthWorkoutJumpRope.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump rope'**
+  String get deviceHealthWorkoutJumpRope;
+
+  /// No description provided for @deviceHealthWorkoutHiking.
+  ///
+  /// In en, this message translates to:
+  /// **'Hiking'**
+  String get deviceHealthWorkoutHiking;
+
+  /// No description provided for @deviceHealthWorkoutGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Workout'**
+  String get deviceHealthWorkoutGeneric;
+
+  /// No description provided for @deviceHealthStrokeMedley.
+  ///
+  /// In en, this message translates to:
+  /// **'Medley'**
+  String get deviceHealthStrokeMedley;
+
+  /// No description provided for @deviceHealthStrokeBreaststroke.
+  ///
+  /// In en, this message translates to:
+  /// **'Breaststroke'**
+  String get deviceHealthStrokeBreaststroke;
+
+  /// No description provided for @deviceHealthStrokeFreestyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Freestyle'**
+  String get deviceHealthStrokeFreestyle;
+
+  /// No description provided for @deviceHealthStrokeBackstroke.
+  ///
+  /// In en, this message translates to:
+  /// **'Backstroke'**
+  String get deviceHealthStrokeBackstroke;
+
+  /// No description provided for @deviceHealthStrokeButterfly.
+  ///
+  /// In en, this message translates to:
+  /// **'Butterfly'**
+  String get deviceHealthStrokeButterfly;
+
+  /// No description provided for @deviceHealthSectionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Section'**
+  String get deviceHealthSectionLabel;
+
+  /// No description provided for @deviceHealthVitalityRunSuggestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Run for {minutes} minutes toward the next target'**
+  String deviceHealthVitalityRunSuggestion(Object minutes);
+
+  /// No description provided for @deviceHealthVitalityActiveMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} active minutes to the next target'**
+  String deviceHealthVitalityActiveMinutes(Object minutes);
+
+  /// No description provided for @deviceHealthLatestHeartRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest heart rate'**
+  String get deviceHealthLatestHeartRate;
+
+  /// No description provided for @deviceHealthLatestBloodOxygen.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest blood oxygen'**
+  String get deviceHealthLatestBloodOxygen;
+
+  /// No description provided for @deviceHealthLatestStress.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest stress'**
+  String get deviceHealthLatestStress;
+
+  /// No description provided for @deviceHealthDebugModeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Health development mode'**
+  String get deviceHealthDebugModeTitle;
+
+  /// No description provided for @deviceHealthDebugModeDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable health data snapshots and reload'**
+  String get deviceHealthDebugModeDescription;
+
+  /// No description provided for @deviceHealthDebugSnapshots.
+  ///
+  /// In en, this message translates to:
+  /// **'Snapshots'**
+  String get deviceHealthDebugSnapshots;
+
+  /// No description provided for @deviceHealthDebugSnapshotList.
+  ///
+  /// In en, this message translates to:
+  /// **'Snapshot list'**
+  String get deviceHealthDebugSnapshotList;
+
+  /// No description provided for @deviceHealthDebugSnapshotsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Captured raw activity files that can be replayed without the watch'**
+  String get deviceHealthDebugSnapshotsDescription;
+
+  /// No description provided for @deviceHealthDebugRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get deviceHealthDebugRefresh;
+
+  /// No description provided for @deviceHealthDebugRefreshDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Reload the saved snapshot list'**
+  String get deviceHealthDebugRefreshDescription;
+
+  /// No description provided for @deviceHealthDebugClearAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all'**
+  String get deviceHealthDebugClearAll;
+
+  /// No description provided for @deviceHealthDebugClearAllDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete every saved health snapshot'**
+  String get deviceHealthDebugClearAllDescription;
+
+  /// No description provided for @deviceHealthDebugNoSnapshots.
+  ///
+  /// In en, this message translates to:
+  /// **'No snapshots yet'**
+  String get deviceHealthDebugNoSnapshots;
+
+  /// No description provided for @deviceHealthDebugReload.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay'**
+  String get deviceHealthDebugReload;
+
+  /// No description provided for @deviceHealthDebugReloaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Snapshot replayed'**
+  String get deviceHealthDebugReloaded;
+
+  /// No description provided for @deviceHealthDebugFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} files'**
+  String deviceHealthDebugFiles(Object count);
+
+  /// No description provided for @creatorAccounts.
+  ///
+  /// In en, this message translates to:
+  /// **'Accounts'**
+  String get creatorAccounts;
+
+  /// No description provided for @creatorPendingItems.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get creatorPendingItems;
+
+  /// No description provided for @creatorResourceStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Resource status'**
+  String get creatorResourceStatus;
+
+  /// No description provided for @creatorOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'Overview'**
+  String get creatorOverview;
+
+  /// No description provided for @creatorManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get creatorManage;
+
+  /// No description provided for @creatorManageUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Management is unavailable'**
+  String get creatorManageUnavailable;
+
+  /// No description provided for @creatorReviewTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviews'**
+  String get creatorReviewTab;
+
+  /// No description provided for @creatorReviewQueue.
+  ///
+  /// In en, this message translates to:
+  /// **'Review queue'**
+  String get creatorReviewQueue;
+
+  /// No description provided for @creatorReviewStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Review status'**
+  String get creatorReviewStatus;
+
+  /// No description provided for @creatorReviewActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get creatorReviewActive;
+
+  /// No description provided for @creatorReviewChangesRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'Changes requested'**
+  String get creatorReviewChangesRequested;
+
+  /// No description provided for @creatorReviewDeclined.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get creatorReviewDeclined;
+
+  /// No description provided for @creatorReviewClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get creatorReviewClosed;
+
+  /// No description provided for @creatorReviewFixedPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed, awaiting review'**
+  String get creatorReviewFixedPending;
+
+  /// No description provided for @creatorNoPendingReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending reviews'**
+  String get creatorNoPendingReviews;
+
+  /// No description provided for @creatorNoReviews.
+  ///
+  /// In en, this message translates to:
+  /// **'No reviews'**
+  String get creatorNoReviews;
+
+  /// No description provided for @creatorNeedsChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Needs changes'**
+  String get creatorNeedsChanges;
+
+  /// No description provided for @creatorConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get creatorConnected;
+
+  /// No description provided for @creatorNotConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected'**
+  String get creatorNotConnected;
+
+  /// No description provided for @creatorCenterExitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave creator center'**
+  String get creatorCenterExitTitle;
+
+  /// No description provided for @creatorCenterExitMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to leave the creator center'**
+  String get creatorCenterExitMessage;
+
+  /// No description provided for @creatorEditComment.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit comment'**
+  String get creatorEditComment;
+
+  /// No description provided for @creatorReply.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get creatorReply;
+
+  /// No description provided for @creatorReplyingTo.
+  ///
+  /// In en, this message translates to:
+  /// **'Replying to #{id}'**
+  String creatorReplyingTo(Object id);
+
+  /// No description provided for @creatorReplyPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply #{id}: '**
+  String creatorReplyPrefix(Object id);
+
+  /// No description provided for @creatorSupplement.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional note'**
+  String get creatorSupplement;
+
+  /// No description provided for @creatorModifyResource.
+  ///
+  /// In en, this message translates to:
+  /// **'Modify resource'**
+  String get creatorModifyResource;
+
+  /// No description provided for @creatorAstroBoxReview.
+  ///
+  /// In en, this message translates to:
+  /// **'AstroBox review'**
+  String get creatorAstroBoxReview;
+
+  /// No description provided for @creatorGithubPr.
+  ///
+  /// In en, this message translates to:
+  /// **'GitHub repository and PR'**
+  String get creatorGithubPr;
+
+  /// No description provided for @creatorApplyChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply changes'**
+  String get creatorApplyChanges;
+
+  /// No description provided for @creatorUpdatedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated at'**
+  String get creatorUpdatedAt;
+
+  /// No description provided for @creatorSubmittedAt.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted at'**
+  String get creatorSubmittedAt;
+
+  /// No description provided for @creatorPublicationStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Publication status'**
+  String get creatorPublicationStatus;
+
+  /// No description provided for @creatorStageInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit info'**
+  String get creatorStageInfo;
+
+  /// No description provided for @creatorStageFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind files'**
+  String get creatorStageFiles;
+
+  /// No description provided for @creatorStagePublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish config'**
+  String get creatorStagePublish;
+
+  /// No description provided for @creatorNextStep.
+  ///
+  /// In en, this message translates to:
+  /// **'Next step'**
+  String get creatorNextStep;
+
+  /// No description provided for @creatorWatchfaceMissingId.
+  ///
+  /// In en, this message translates to:
+  /// **'Watchface identification failed or all-zero: the watchface has no ID and cannot be uploaded'**
+  String get creatorWatchfaceMissingId;
+
+  /// No description provided for @creatorWatchfaceZeroIdTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'All-zero watchface ID detected, please modify it before uploading'**
+  String get creatorWatchfaceZeroIdTitle;
+
+  /// No description provided for @creatorWatchfacePayloadTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'This watchface file is too small to contain an ID field'**
+  String get creatorWatchfacePayloadTooShort;
+
+  /// No description provided for @creatorQuickAppMissingPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick app identification failed: the quick app has no package name and cannot be uploaded'**
+  String get creatorQuickAppMissingPackage;
+
+  /// No description provided for @creatorVelajsDefaultPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Detected the quick app package name com.application.watch.demo, which is the VelaJS project default; please change it before uploading'**
+  String get creatorVelajsDefaultPackage;
+
+  /// No description provided for @creatorFilteredSupport.
+  ///
+  /// In en, this message translates to:
+  /// **'Filtered support'**
+  String get creatorFilteredSupport;
+
+  /// No description provided for @creatorSkippedPublication.
+  ///
+  /// In en, this message translates to:
+  /// **'Skipped publication'**
+  String get creatorSkippedPublication;
+
+  /// No description provided for @creatorAstroBoxUnsupportedDevicesNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Some selected supported devices do not support publishing to AstroBox yet; their support declarations will be filtered out'**
+  String get creatorAstroBoxUnsupportedDevicesNotice;
+
+  /// No description provided for @creatorBandBbsUnsupportedDevicesNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Some selected supported devices do not support publishing to BandBBS yet; their publication will be skipped'**
+  String get creatorBandBbsUnsupportedDevicesNotice;
+
+  /// No description provided for @errorSppBondRemovalFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'On Android below 11 the system does not support removeBond. If the device disconnects frequently, switch to another device in Xiaomi Fitness or turn off its Nearby devices permission'**
+  String get errorSppBondRemovalFailed;
+
+  /// No description provided for @viewAllResources.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get viewAllResources;
+
+  /// No description provided for @deviceHealthMinimum.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum'**
+  String get deviceHealthMinimum;
+
+  /// No description provided for @deviceHealthMaximum.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum'**
+  String get deviceHealthMaximum;
+
+  /// No description provided for @deviceHealthResting.
+  ///
+  /// In en, this message translates to:
+  /// **'Resting'**
+  String get deviceHealthResting;
+
+  /// Export button label for a raw Xiaomi health debug snapshot
+  ///
+  /// In en, this message translates to:
+  /// **'Export snapshot'**
+  String get deviceHealthDebugExport;
+
+  /// Tooltip for the debug snapshot export button
+  ///
+  /// In en, this message translates to:
+  /// **'Export raw activity files'**
+  String get deviceHealthDebugExportTooltip;
+
+  /// Shown after a debug snapshot is exported
+  ///
+  /// In en, this message translates to:
+  /// **'Exported to {path}'**
+  String deviceHealthDebugExported(String path);
+
+  /// Shown when exporting a debug snapshot fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not export snapshot: {error}'**
+  String deviceHealthDebugExportFailed(String error);
+
+  /// Import button label on the Xiaomi health debug page
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get deviceHealthDebugImport;
+
+  /// Description for the debug snapshot import button
+  ///
+  /// In en, this message translates to:
+  /// **'Import a previously exported snapshot file'**
+  String get deviceHealthDebugImportDescription;
+
+  /// Shown after a debug snapshot is imported
+  ///
+  /// In en, this message translates to:
+  /// **'Imported {deviceCode} ({files} files)'**
+  String deviceHealthDebugImported(String deviceCode, int files);
+
+  /// Shown when importing a debug snapshot fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not import snapshot: {error}'**
+  String deviceHealthDebugImportFailed(String error);
 }
 
 class _AppLocalizationsDelegate

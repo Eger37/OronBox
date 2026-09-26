@@ -590,6 +590,7 @@
   "deviceHealthDistance": "Distance",
   "deviceHealthCalories": "Calories",
   "deviceHealthHeartRate": "Heart rate",
+  "deviceHealthAverageHeartRateLabel": "Average heart rate",
   "deviceHealthRestingHeartRate": "Resting heart rate",
   "deviceHealthAbnormalHeartRate": "Abnormal heart rate",
   "deviceHealthHeartRateHigh": "High heart rate",
@@ -605,6 +606,7 @@
   "deviceHealthAllDaySleep": "All-day sleep",
   "deviceHealthLongSleep": "Long sleep",
   "deviceHealthSleepStructure": "Sleep structure",
+  "deviceHealthSleepDetails": "Sleep details",
   "deviceHealthSleepAverageHeartRate": "Average sleep heart rate",
   "deviceHealthSleepAverageBloodOxygen": "Average sleep blood oxygen",
   "deviceHealthAverageHeartRate": "Average heart rate {value} bpm",
@@ -1489,23 +1491,65 @@
   "messageApprovedBody": "Your submission passed review.",
   "messageNeedsChangesBody": "Review found issues that require changes.",
   "messageReasonBody": "Reason: {reason}",
-  "@messageReasonBody": {"placeholders": {"reason": {"type": "String"}}},
+  "@messageReasonBody": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
   "messageReviewNoteBody": "Review note: {note}",
-  "@messageReviewNoteBody": {"placeholders": {"note": {"type": "String"}}},
+  "@messageReviewNoteBody": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
   "messageStatusChangedBody": "The status of this item has changed.",
   "messageReportStatusBody": "Report status: {status}",
-  "@messageReportStatusBody": {"placeholders": {"status": {"type": "String"}}},
+  "@messageReportStatusBody": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
   "messageCoinAddedBody": "{amount} coins were added to your account.",
-  "@messageCoinAddedBody": {"placeholders": {"amount": {"type": "String"}}},
+  "@messageCoinAddedBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "messageCoinDeductedBody": "{amount} coins were deducted from your account.",
-  "@messageCoinDeductedBody": {"placeholders": {"amount": {"type": "String"}}},
+  "@messageCoinDeductedBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "messageCoinVoteRevokedBody": "Your contribution of {amount} coins to this resource was revoked.",
-  "@messageCoinVoteRevokedBody": {"placeholders": {"amount": {"type": "String"}}},
+  "@messageCoinVoteRevokedBody": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
   "messageAppealOverturnedBody": "The administrator reversed the original decision.",
   "messageAppealUpheldBody": "The original decision remains unchanged after review.",
   "messageAppealDismissedBody": "The appeal was not accepted.",
   "messageRoleChangedBody": "Your account role is now {role}.",
-  "@messageRoleChangedBody": {"placeholders": {"role": {"type": "String"}}},
+  "@messageRoleChangedBody": {
+    "placeholders": {
+      "role": {
+        "type": "String"
+      }
+    }
+  },
   "cleanMode": "Feature switches",
   "cleanModeDescription": "Manage main navigation, community features, and resource sources",
   "cleanPluginsEntry": "Plugins entry",
@@ -1777,7 +1821,11 @@
   "deviceHealthSleepRem": "REM",
   "deviceHealthSleepNoStages": "No sleep stage data",
   "deviceHealthStepValue": "{value} steps",
-  "@deviceHealthStepValue": {"placeholders": {"value": {}}},
+  "@deviceHealthStepValue": {
+    "placeholders": {
+      "value": {}
+    }
+  },
   "deviceHealthFeatureDescription": "View activity, heart rate, blood oxygen, stress, and sleep data",
   "weatherSyncTitle": "Weather sync",
   "weatherSyncDescription": "Select a city and sync current weather and forecasts",
@@ -1819,7 +1867,11 @@
   "alarmYearly": "Yearly",
   "alarmNoRepeat": "Does not repeat",
   "alarmCustomDays": "Week {days}",
-  "@alarmCustomDays": {"placeholders": {"days": {}}},
+  "@alarmCustomDays": {
+    "placeholders": {
+      "days": {}
+    }
+  },
   "weekdayMonShort": "M",
   "weekdayTueShort": "T",
   "weekdayWedShort": "W",
@@ -1845,13 +1897,33 @@
   "weatherNext24Hours": "Next 24 hours",
   "weatherNext7Days": "Next 7 days",
   "weatherDataSource": "Data source: {source}",
-  "@weatherDataSource": {"placeholders": {"source": {}}},
+  "@weatherDataSource": {
+    "placeholders": {
+      "source": {}
+    }
+  },
   "weatherLevelDirection": "Level {level} · {direction}",
-  "@weatherLevelDirection": {"placeholders": {"level": {}, "direction": {}}},
+  "@weatherLevelDirection": {
+    "placeholders": {
+      "level": {},
+      "direction": {}
+    }
+  },
   "weatherLevelDirectionCompact": "Level {level} {direction}",
-  "@weatherLevelDirectionCompact": {"placeholders": {"level": {}, "direction": {}}},
+  "@weatherLevelDirectionCompact": {
+    "placeholders": {
+      "level": {},
+      "direction": {}
+    }
+  },
   "weatherForecastSummary": "{condition} · Sunrise {sunrise} · Sunset {sunset}",
-  "@weatherForecastSummary": {"placeholders": {"condition": {}, "sunrise": {}, "sunset": {}}},
+  "@weatherForecastSummary": {
+    "placeholders": {
+      "condition": {},
+      "sunrise": {},
+      "sunset": {}
+    }
+  },
   "weatherClear": "Clear",
   "weatherPartlyCloudy": "Partly cloudy",
   "weatherCloudy": "Cloudy",
@@ -1863,7 +1935,11 @@
   "weatherUnknown": "Unknown",
   "weatherUnknownDate": "Unknown date",
   "weatherUpdatedAt": "Updated {time}",
-  "@weatherUpdatedAt": {"placeholders": {"time": {}}},
+  "@weatherUpdatedAt": {
+    "placeholders": {
+      "time": {}
+    }
+  },
   "windNorth": "N",
   "windNorthEast": "NE",
   "windEast": "E",
@@ -1879,5 +1955,266 @@
   "xiaomiScreenshotEmpty": "No screenshot yet",
   "xiaomiScreenshotFailed": "Screenshot failed",
   "xiaomiScreenshotSaved": "Watch screenshot saved to: {path}",
-  "@xiaomiScreenshotSaved": {"placeholders": {"path": {}}}
+  "@xiaomiScreenshotSaved": {
+    "placeholders": {
+      "path": {}
+    }
+  },
+  "deviceHealthRecoveryTime": "Recovery",
+  "deviceHealthTodayLoad": "Today load",
+  "deviceHealthSevenDayLoad": "7-day load",
+  "deviceHealthLoadLevel": "Load level",
+  "deviceHealthFitnessBalance": "Fitness balance",
+  "deviceHealthFitnessLevel": "Fitness",
+  "deviceHealthFatigueLevel": "Fatigue",
+  "deviceHealthTrainingStress": "Training stress",
+  "deviceHealthTrainingStatus": "Training status",
+  "deviceHealthSevenDayVitality": "7-day vitality",
+  "deviceHealthEarnedToday": "Earned on this day",
+  "deviceHealthEarnedInPeriod": "Earned in this period",
+  "deviceHealthModerateIntensity": "Moderate",
+  "deviceHealthHighIntensity": "High",
+  "deviceHealthNap": "Naps",
+  "deviceHealthNapSingular": "Nap",
+  "deviceHealthWorkoutOverview": "Workout overview",
+  "deviceHealthWorkoutHistory": "History",
+  "deviceHealthWorkoutDuration": "Duration",
+  "deviceHealthWorkoutRoute": "Route",
+  "deviceHealthWorkoutDetails": "Details",
+  "deviceHealthSwimmingSections": "Swimming sections",
+  "deviceHealthWorkoutCharts": "Workout charts",
+  "deviceHealthActiveDuration": "Active duration",
+  "deviceHealthAveragePace": "Average pace",
+  "deviceHealthBestPace": "Best pace",
+  "deviceHealthHeartRateRange": "Heart-rate range",
+  "deviceHealthBloodOxygenRange": "Blood oxygen range",
+  "deviceHealthMainStroke": "Main stroke",
+  "deviceHealthHeartRateZones": "Heart-rate zones",
+  "deviceHealthZoneLabel": "Zone {zone}",
+  "@deviceHealthZoneLabel": {
+    "placeholders": {
+      "zone": {}
+    }
+  },
+  "deviceHealthZoneWarmup": "Warm-up",
+  "deviceHealthZoneFatBurning": "Fat burning",
+  "deviceHealthZoneAerobic": "Aerobic",
+  "deviceHealthZoneAnaerobic": "Anaerobic",
+  "deviceHealthZoneExtreme": "Extreme",
+  "deviceHealthRecoveryAfterWorkout": "Heart-rate recovery",
+  "deviceHealthRecoveredHeartRate": "Recovered HR",
+  "deviceHealthRecoveryRate": "Recovery rate",
+  "deviceHealthSamples": "Samples",
+  "deviceHealthAverageSpeed": "Average speed",
+  "deviceHealthTopSpeed": "Top speed",
+  "deviceHealthAverageStride": "Average stride",
+  "deviceHealthAverageCadence": "Average cadence",
+  "deviceHealthMaximumCadence": "Maximum cadence",
+  "deviceHealthAverageBloodOxygenDetail": "Average blood oxygen",
+  "deviceHealthTotalAscent": "Total ascent",
+  "deviceHealthTotalDescent": "Total descent",
+  "deviceHealthAverageAltitude": "Average altitude",
+  "deviceHealthAerobicEffect": "Aerobic effect",
+  "deviceHealthAnaerobicEffect": "Anaerobic effect",
+  "deviceHealthPeakEffect": "Peak effect",
+  "deviceHealthVo2Max": "VO₂ max",
+  "deviceHealthBodyEnergyUsed": "Body energy used",
+  "deviceHealthExpectedRecovery": "Recovery",
+  "deviceHealthTrainingLoad": "Training load",
+  "deviceHealthVitalityEarned": "Vitality earned",
+  "deviceHealthAveragePower": "Average power",
+  "deviceHealthMaximumPower": "Maximum power",
+  "deviceHealthArmPulls": "Arm pulls",
+  "deviceHealthAverageStrokeRate": "Average stroke rate",
+  "deviceHealthMaximumStrokeRate": "Maximum stroke rate",
+  "deviceHealthTurns": "Turns",
+  "deviceHealthAverageSwolf": "Average SWOLF",
+  "deviceHealthBestSwolf": "Best SWOLF",
+  "deviceHealthPoolLength": "Pool length",
+  "deviceHealthJumps": "Jumps",
+  "deviceHealthAverageJumpRate": "Average jump rate",
+  "deviceHealthBestJumpRate": "Best jump rate",
+  "deviceHealthTrips": "Trips",
+  "deviceHealthSets": "Sets",
+  "deviceHealthTotalStrokes": "Total strokes",
+  "deviceHealthAverageRowingRate": "Average rowing rate",
+  "deviceHealthBestRowingRate": "Best rowing rate",
+  "deviceHealthChartHeartRate": "Heart rate",
+  "deviceHealthChartCadence": "Cadence",
+  "deviceHealthChartPace": "Pace",
+  "deviceHealthChartSpeed": "Speed",
+  "deviceHealthChartPower": "Power",
+  "deviceHealthChartStrokeRate": "Stroke rate",
+  "deviceHealthChartJumpRate": "Jump rate",
+  "deviceHealthChartBloodOxygen": "Blood oxygen",
+  "deviceHealthChartStress": "Stress",
+  "deviceHealthWorkoutOutdoorRunning": "Outdoor running",
+  "deviceHealthWorkoutOutdoorWalking": "Outdoor walking",
+  "deviceHealthWorkoutIndoorRunning": "Indoor running",
+  "deviceHealthWorkoutMountaineering": "Mountaineering",
+  "deviceHealthWorkoutTrailRunning": "Trail running",
+  "deviceHealthWorkoutOutdoorCycling": "Outdoor cycling",
+  "deviceHealthWorkoutIndoorCycling": "Indoor cycling",
+  "deviceHealthWorkoutFreeTraining": "Free training",
+  "deviceHealthWorkoutSwimming": "Swimming",
+  "deviceHealthWorkoutElliptical": "Elliptical",
+  "deviceHealthWorkoutRowing": "Rowing",
+  "deviceHealthWorkoutJumpRope": "Jump rope",
+  "deviceHealthWorkoutHiking": "Hiking",
+  "deviceHealthWorkoutGeneric": "Workout",
+  "deviceHealthStrokeMedley": "Medley",
+  "deviceHealthStrokeBreaststroke": "Breaststroke",
+  "deviceHealthStrokeFreestyle": "Freestyle",
+  "deviceHealthStrokeBackstroke": "Backstroke",
+  "deviceHealthStrokeButterfly": "Butterfly",
+  "deviceHealthSectionLabel": "Section",
+  "deviceHealthVitalityRunSuggestion": "Run for {minutes} minutes toward the next target",
+  "@deviceHealthVitalityRunSuggestion": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "deviceHealthVitalityActiveMinutes": "{minutes} active minutes to the next target",
+  "@deviceHealthVitalityActiveMinutes": {
+    "placeholders": {
+      "minutes": {}
+    }
+  },
+  "deviceHealthLatestHeartRate": "Latest heart rate",
+  "deviceHealthLatestBloodOxygen": "Latest blood oxygen",
+  "deviceHealthLatestStress": "Latest stress",
+  "deviceHealthDebugModeTitle": "Health development mode",
+  "deviceHealthDebugModeDescription": "Enable health data snapshots and reload",
+  "deviceHealthDebugSnapshots": "Snapshots",
+  "deviceHealthDebugSnapshotList": "Snapshot list",
+  "deviceHealthDebugSnapshotsDescription": "Captured raw activity files that can be replayed without the watch",
+  "deviceHealthDebugRefresh": "Refresh",
+  "deviceHealthDebugRefreshDescription": "Reload the saved snapshot list",
+  "deviceHealthDebugClearAll": "Clear all",
+  "deviceHealthDebugClearAllDescription": "Delete every saved health snapshot",
+  "deviceHealthDebugNoSnapshots": "No snapshots yet",
+  "deviceHealthDebugReload": "Replay",
+  "deviceHealthDebugReloaded": "Snapshot replayed",
+  "deviceHealthDebugFiles": "{count} files",
+  "@deviceHealthDebugFiles": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "creatorAccounts": "Accounts",
+  "creatorPendingItems": "Pending",
+  "creatorResourceStatus": "Resource status",
+  "creatorOverview": "Overview",
+  "creatorManage": "Manage",
+  "creatorManageUnavailable": "Management is unavailable",
+  "creatorReviewTab": "Reviews",
+  "creatorReviewQueue": "Review queue",
+  "creatorReviewStatus": "Review status",
+  "creatorReviewActive": "Active",
+  "creatorReviewChangesRequested": "Changes requested",
+  "creatorReviewDeclined": "Rejected",
+  "creatorReviewClosed": "Closed",
+  "creatorReviewFixedPending": "Fixed, awaiting review",
+  "creatorNoPendingReviews": "No pending reviews",
+  "creatorNoReviews": "No reviews",
+  "creatorNeedsChanges": "Needs changes",
+  "creatorConnected": "Connected",
+  "creatorNotConnected": "Not connected",
+  "creatorCenterExitTitle": "Leave creator center",
+  "creatorCenterExitMessage": "Are you sure you want to leave the creator center",
+  "creatorEditComment": "Edit comment",
+  "creatorReply": "Reply",
+  "creatorReplyingTo": "Replying to #{id}",
+  "@creatorReplyingTo": {
+    "placeholders": {
+      "id": {}
+    }
+  },
+  "creatorReplyPrefix": "Reply #{id}: ",
+  "@creatorReplyPrefix": {
+    "placeholders": {
+      "id": {}
+    }
+  },
+  "creatorSupplement": "Additional note",
+  "creatorModifyResource": "Modify resource",
+  "creatorAstroBoxReview": "AstroBox review",
+  "creatorGithubPr": "GitHub repository and PR",
+  "creatorApplyChanges": "Apply changes",
+  "creatorUpdatedAt": "Updated at",
+  "creatorSubmittedAt": "Submitted at",
+  "creatorPublicationStatus": "Publication status",
+  "creatorStageInfo": "Edit info",
+  "creatorStageFiles": "Bind files",
+  "creatorStagePublish": "Publish config",
+  "creatorNextStep": "Next step",
+  "creatorWatchfaceMissingId": "Watchface identification failed or all-zero: the watchface has no ID and cannot be uploaded",
+  "creatorWatchfaceZeroIdTitle": "All-zero watchface ID detected, please modify it before uploading",
+  "creatorWatchfacePayloadTooShort": "This watchface file is too small to contain an ID field",
+  "creatorQuickAppMissingPackage": "Quick app identification failed: the quick app has no package name and cannot be uploaded",
+  "creatorVelajsDefaultPackage": "Detected the quick app package name com.application.watch.demo, which is the VelaJS project default; please change it before uploading",
+  "creatorFilteredSupport": "Filtered support",
+  "creatorSkippedPublication": "Skipped publication",
+  "creatorAstroBoxUnsupportedDevicesNotice": "Some selected supported devices do not support publishing to AstroBox yet; their support declarations will be filtered out",
+  "creatorBandBbsUnsupportedDevicesNotice": "Some selected supported devices do not support publishing to BandBBS yet; their publication will be skipped",
+  "errorSppBondRemovalFailed": "On Android below 11 the system does not support removeBond. If the device disconnects frequently, switch to another device in Xiaomi Fitness or turn off its Nearby devices permission",
+  "viewAllResources": "View all",
+  "deviceHealthMinimum": "Minimum",
+  "deviceHealthMaximum": "Maximum",
+  "deviceHealthResting": "Resting",
+  "deviceHealthDebugExport": "Export snapshot",
+  "deviceHealthDebugExportTooltip": "Export raw activity files",
+  "deviceHealthDebugExported": "Exported to {path}",
+  "deviceHealthDebugExportFailed": "Could not export snapshot: {error}",
+  "@deviceHealthDebugExport": {
+    "description": "Export button label for a raw Xiaomi health debug snapshot"
+  },
+  "@deviceHealthDebugExportTooltip": {
+    "description": "Tooltip for the debug snapshot export button"
+  },
+  "@deviceHealthDebugExported": {
+    "description": "Shown after a debug snapshot is exported",
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "@deviceHealthDebugExportFailed": {
+    "description": "Shown when exporting a debug snapshot fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "deviceHealthDebugImport": "Import",
+  "deviceHealthDebugImportDescription": "Import a previously exported snapshot file",
+  "deviceHealthDebugImported": "Imported {deviceCode} ({files} files)",
+  "deviceHealthDebugImportFailed": "Could not import snapshot: {error}",
+  "@deviceHealthDebugImport": {
+    "description": "Import button label on the Xiaomi health debug page"
+  },
+  "@deviceHealthDebugImportDescription": {
+    "description": "Description for the debug snapshot import button"
+  },
+  "@deviceHealthDebugImported": {
+    "description": "Shown after a debug snapshot is imported",
+    "placeholders": {
+      "deviceCode": {
+        "type": "String"
+      },
+      "files": {
+        "type": "int"
+      }
+    }
+  },
+  "@deviceHealthDebugImportFailed": {
+    "description": "Shown when importing a debug snapshot fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  }
 }

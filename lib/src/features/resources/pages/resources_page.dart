@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:oronbox/src/app/generated/app_localizations.dart';
@@ -262,6 +262,8 @@ class _ResourceHomeView extends ConsumerStatefulWidget {
 class _ResourceHomeViewState extends ConsumerState<_ResourceHomeView>
     with RouteAware {
   String? _activeHeroOccurrence;
+  var _resourcePushInFlight = false;
+  var _heroOccurrenceGeneration = 0;
   ModalRoute<dynamic>? _observedRoute;
 
   @override
@@ -285,23 +287,26 @@ class _ResourceHomeViewState extends ConsumerState<_ResourceHomeView>
 
   @override
   void didPopNext() {
-    _finishHeroAfterRoutePop(resourceRouteObserver.takeLastPoppedRoute());
+    _finishHeroAfterRoutePop(
+      resourceRouteObserver.takeLastPoppedRoute(),
+      _heroOccurrenceGeneration,
+    );
   }
 
-  void _finishHeroAfterRoutePop(Route<dynamic>? route) {
+  void _finishHeroAfterRoutePop(Route<dynamic>? route, int generation) {
     if (_activeHeroOccurrence == null) return;
     final animation = route is TransitionRoute<dynamic>
         ? route.animation
         : null;
     if (animation == null || animation.status == AnimationStatus.dismissed) {
-      _clearActiveHeroOccurrence();
+      _clearActiveHeroOccurrence(generation);
       return;
     }
 
     void handleStatus(AnimationStatus status) {
       if (status == AnimationStatus.dismissed) {
         animation.removeStatusListener(handleStatus);
-        _clearActiveHeroOccurrence();
+        _clearActiveHeroOccurrence(generation);
       } else if (status == AnimationStatus.completed) {
         // A back gesture may have been canceled. Keep the source Hero enabled
         // so a later pop can start a new flight.
@@ -312,21 +317,33 @@ class _ResourceHomeViewState extends ConsumerState<_ResourceHomeView>
     animation.addStatusListener(handleStatus);
   }
 
-  void _clearActiveHeroOccurrence() {
-    if (mounted && _activeHeroOccurrence != null) {
+  void _clearActiveHeroOccurrence(int generation) {
+    if (mounted &&
+        generation == _heroOccurrenceGeneration &&
+        _activeHeroOccurrence != null) {
       setState(() => _activeHeroOccurrence = null);
     }
   }
 
   void _openResource(CommunityResource resource, String occurrence) {
-    if (_activeHeroOccurrence != null) return;
+    if (_resourcePushInFlight) return;
+    _resourcePushInFlight = true;
+    _heroOccurrenceGeneration += 1;
     setState(() => _activeHeroOccurrence = occurrence);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+      if (!mounted) {
+        _resourcePushInFlight = false;
+        return;
+      }
       final path = resource.isCollection
           ? '/resources/collection/${resource.ref.id}'
           : '/resources/detail/${resource.ref.id}';
-      unawaited(context.push(path, extra: resource));
+      unawaited(
+        context.push(path, extra: resource).whenComplete(() {
+          if (!mounted || !_resourcePushInFlight) return;
+          setState(() => _resourcePushInFlight = false);
+        }),
+      );
     });
   }
 
@@ -338,21 +355,24 @@ class _ResourceHomeViewState extends ConsumerState<_ResourceHomeView>
     final sections = [
       if (clean.homeLatestEnabled)
         (
-          l10n.newlyPublished,
-          CommunitySortRule.time,
-          ref.watch(_homeFeedProvider(CommunitySortRule.time)),
+          title: l10n.newlyPublished,
+          sort: CommunitySortRule.time,
+          feed: ref.watch(_homeFeedProvider(CommunitySortRule.time)),
+          hideWhileLoading: false,
         ),
       if (clean.homeRecommendedEnabled)
         (
-          l10n.resourceHomeRecommended,
-          CommunitySortRule.recommendation,
-          ref.watch(_homeFeedProvider(CommunitySortRule.recommendation)),
+          title: l10n.resourceHomeRecommended,
+          sort: CommunitySortRule.recommendation,
+          feed: ref.watch(_homeFeedProvider(CommunitySortRule.recommendation)),
+          hideWhileLoading: false,
         ),
       if (clean.homeFeaturedEnabled)
         (
-          l10n.resourceHomeFeatured,
-          CommunitySortRule.recommendation,
-          ref.watch(_featuredFeedProvider),
+          title: l10n.resourceHomeFeatured,
+          sort: CommunitySortRule.recommendation,
+          feed: ref.watch(_featuredFeedProvider),
+          hideWhileLoading: true,
         ),
     ];
     final curated = home.value;
@@ -363,13 +383,13 @@ class _ResourceHomeViewState extends ConsumerState<_ResourceHomeView>
             (!clean.homeEditorSectionsEnabled ||
                 curated.sections.every((section) => section.cards.isEmpty)));
     final allFailed =
-        home.hasError && sections.every((section) => section.$3.hasError);
+        home.hasError && sections.every((section) => section.feed.hasError);
     final allEmpty =
         !allFailed &&
         !home.isLoading &&
         curatedEmpty &&
         sections.every(
-          (section) => section.$3.hasValue && section.$3.value!.isEmpty,
+          (section) => section.feed.hasValue && section.feed.value!.isEmpty,
         );
 
     return RefreshIndicator(
@@ -388,7 +408,7 @@ class _ResourceHomeViewState extends ConsumerState<_ResourceHomeView>
                 hasScrollBody: false,
                 child: _HomeEmpty(
                   error: sections
-                      .map((section) => section.$3.error)
+                      .map((section) => section.feed.error)
                       .firstOrNull,
                 ),
               )
@@ -428,19 +448,57 @@ class _ResourceHomeViewState extends ConsumerState<_ResourceHomeView>
                           ),
                         ),
                   for (var index = 0; index < sections.length; index++)
-                    _HomeSection(
-                      title: sections[index].$1,
-                      sort: sections[index].$2,
-                      feed: sections[index].$3,
-                      heroOccurrencePrefix: 'feed:$index',
-                      heroOccurrence: _activeHeroOccurrence,
-                      onResourceTap: (resource, itemIndex) =>
-                          _openResource(resource, 'feed:$index:$itemIndex'),
+                    if ((!sections[index].hideWhileLoading &&
+                            sections[index].feed.isLoading) ||
+                        (sections[index].feed.hasValue &&
+                            sections[index].feed.value!.isNotEmpty))
+                      _HomeSection(
+                        title: sections[index].title,
+                        sort: sections[index].sort,
+                        feed: sections[index].feed,
+                        heroOccurrencePrefix: 'feed:$index',
+                        heroOccurrence: _activeHeroOccurrence,
+                        onResourceTap: (resource, itemIndex) =>
+                            _openResource(resource, 'feed:$index:$itemIndex'),
+                      ),
+                  if (clean.resourceLibraryEnabled && clean.hasResourceSource)
+                    _HomeAllResourcesFooter(
+                      onPressed: () => ref
+                          .read(resourceModeControllerProvider.notifier)
+                          .setMode(ResourceMode.library),
                     ),
                   const SizedBox(height: StyleConstants.pagePadding),
                 ],
               ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HomeAllResourcesFooter extends StatelessWidget {
+  const _HomeAllResourcesFooter({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final colors = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: StyleConstants.pagePadding,
+        vertical: 24,
+      ),
+      child: Center(
+        child: FilledButton.tonal(
+          style: FilledButton.styleFrom(
+            backgroundColor: colors.surfaceContainerHighest,
+            foregroundColor: colors.onSurface,
+          ),
+          onPressed: onPressed,
+          child: Text(l10n.viewAllResources),
         ),
       ),
     );
@@ -486,9 +544,8 @@ class _HomeSection extends ConsumerWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium
+                      ?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
               TextButton(
@@ -549,9 +606,9 @@ class _HomeSection extends ConsumerWidget {
                           child: Text(
                             localizedErrorMessage(l10n, error),
                             style: TextStyle(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                           ),
                         ),
@@ -608,9 +665,8 @@ class _HomeEmpty extends ConsumerWidget {
             const SizedBox(height: 8),
             Text(
               l10n.resourceHomeEmptySubtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium
+                  ?.copyWith(color: colorScheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -658,9 +714,8 @@ class _HomeSlotEmpty extends StatelessWidget {
       child: Center(
         child: Text(
           AppLocalizations.of(context)!.noContent,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+          style: Theme.of(context).textTheme.bodySmall
+              ?.copyWith(color: colors.onSurfaceVariant),
         ),
       ),
     );
@@ -698,9 +753,8 @@ class _HomeResourceSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(
-      context,
-    ).colorScheme.onSurfaceVariant.withValues(alpha: .12);
+    final color = Theme.of(context).colorScheme.onSurfaceVariant
+        .withValues(alpha: .12);
     return Card(
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
@@ -953,17 +1007,15 @@ class _HomeEditorSection extends StatelessWidget {
         children: [
           Text(
             section.name,
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.w600),
           ),
           if (section.description.isNotEmpty) ...[
             const SizedBox(height: 4),
             Text(
               section.description,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: colors.onSurfaceVariant),
             ),
           ],
           const SizedBox(height: 12),
@@ -1005,9 +1057,8 @@ class _HomeBlogSection extends StatelessWidget {
       children: [
         Text(
           AppLocalizations.of(context)!.resourceHomeUpdates,
-          style: Theme.of(
-            context,
-          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+          style: Theme.of(context).textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 12),
         for (final blog in blogs) ...[
@@ -1154,9 +1205,8 @@ class _WideResourceCard extends StatelessWidget {
                         card.owner,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: colors.onSurfaceVariant),
                       ),
                     ),
                   ],
@@ -1247,9 +1297,8 @@ class _HomeBlogCard extends StatelessWidget {
                     card.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
                   ),
                   if (card.subtitle.isNotEmpty) ...[
                     const SizedBox(height: 4),
@@ -1257,9 +1306,8 @@ class _HomeBlogCard extends StatelessWidget {
                       card.subtitle,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: colors.onSurfaceVariant),
                     ),
                   ],
                 ],
@@ -1959,9 +2007,8 @@ class _OtherSourcesFooter extends ConsumerWidget {
         children: [
           Text(
             l10n.resourceLibraryEndOfList,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: colors.onSurfaceVariant),
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -2393,9 +2440,8 @@ class _HuamiDeviceSourceInputState
               border: const OutlineInputBorder(),
               suffixIcon: widget.filters.selectedDevices.any(_isNumeric)
                   ? IconButton(
-                      tooltip: MaterialLocalizations.of(
-                        context,
-                      ).deleteButtonTooltip,
+                      tooltip: MaterialLocalizations.of(context)
+                          .deleteButtonTooltip,
                       icon: const Icon(Icons.clear),
                       onPressed: () {
                         _controller.clear();
@@ -2728,10 +2774,8 @@ class _ResourceCard extends ConsumerWidget {
                     item.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      height: 1.25,
-                    ),
+                    style: Theme.of(context).textTheme.titleSmall
+                        ?.copyWith(fontWeight: FontWeight.w600, height: 1.25),
                   ),
                   const SizedBox(height: 8),
                   Wrap(

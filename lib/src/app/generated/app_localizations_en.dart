@@ -1380,6 +1380,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceHealthHeartRate => 'Heart rate';
 
   @override
+  String get deviceHealthAverageHeartRateLabel => 'Average heart rate';
+
+  @override
   String get deviceHealthRestingHeartRate => 'Resting heart rate';
 
   @override
@@ -1423,6 +1426,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deviceHealthSleepStructure => 'Sleep structure';
+
+  @override
+  String get deviceHealthSleepDetails => 'Sleep details';
 
   @override
   String get deviceHealthSleepAverageHeartRate => 'Average sleep heart rate';
@@ -4253,5 +4259,579 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String xiaomiScreenshotSaved(Object path) {
     return 'Watch screenshot saved to: $path';
+  }
+
+  @override
+  String get deviceHealthRecoveryTime => 'Recovery';
+
+  @override
+  String get deviceHealthTodayLoad => 'Today load';
+
+  @override
+  String get deviceHealthSevenDayLoad => '7-day load';
+
+  @override
+  String get deviceHealthLoadLevel => 'Load level';
+
+  @override
+  String get deviceHealthFitnessBalance => 'Fitness balance';
+
+  @override
+  String get deviceHealthFitnessLevel => 'Fitness';
+
+  @override
+  String get deviceHealthFatigueLevel => 'Fatigue';
+
+  @override
+  String get deviceHealthTrainingStress => 'Training stress';
+
+  @override
+  String get deviceHealthTrainingStatus => 'Training status';
+
+  @override
+  String get deviceHealthSevenDayVitality => '7-day vitality';
+
+  @override
+  String get deviceHealthEarnedToday => 'Earned on this day';
+
+  @override
+  String get deviceHealthEarnedInPeriod => 'Earned in this period';
+
+  @override
+  String get deviceHealthModerateIntensity => 'Moderate';
+
+  @override
+  String get deviceHealthHighIntensity => 'High';
+
+  @override
+  String get deviceHealthNap => 'Naps';
+
+  @override
+  String get deviceHealthNapSingular => 'Nap';
+
+  @override
+  String get deviceHealthWorkoutOverview => 'Workout overview';
+
+  @override
+  String get deviceHealthWorkoutHistory => 'History';
+
+  @override
+  String get deviceHealthWorkoutDuration => 'Duration';
+
+  @override
+  String get deviceHealthWorkoutRoute => 'Route';
+
+  @override
+  String get deviceHealthWorkoutDetails => 'Details';
+
+  @override
+  String get deviceHealthSwimmingSections => 'Swimming sections';
+
+  @override
+  String get deviceHealthWorkoutCharts => 'Workout charts';
+
+  @override
+  String get deviceHealthActiveDuration => 'Active duration';
+
+  @override
+  String get deviceHealthAveragePace => 'Average pace';
+
+  @override
+  String get deviceHealthBestPace => 'Best pace';
+
+  @override
+  String get deviceHealthHeartRateRange => 'Heart-rate range';
+
+  @override
+  String get deviceHealthBloodOxygenRange => 'Blood oxygen range';
+
+  @override
+  String get deviceHealthMainStroke => 'Main stroke';
+
+  @override
+  String get deviceHealthHeartRateZones => 'Heart-rate zones';
+
+  @override
+  String deviceHealthZoneLabel(Object zone) {
+    return 'Zone $zone';
+  }
+
+  @override
+  String get deviceHealthZoneWarmup => 'Warm-up';
+
+  @override
+  String get deviceHealthZoneFatBurning => 'Fat burning';
+
+  @override
+  String get deviceHealthZoneAerobic => 'Aerobic';
+
+  @override
+  String get deviceHealthZoneAnaerobic => 'Anaerobic';
+
+  @override
+  String get deviceHealthZoneExtreme => 'Extreme';
+
+  @override
+  String get deviceHealthRecoveryAfterWorkout => 'Heart-rate recovery';
+
+  @override
+  String get deviceHealthRecoveredHeartRate => 'Recovered HR';
+
+  @override
+  String get deviceHealthRecoveryRate => 'Recovery rate';
+
+  @override
+  String get deviceHealthSamples => 'Samples';
+
+  @override
+  String get deviceHealthAverageSpeed => 'Average speed';
+
+  @override
+  String get deviceHealthTopSpeed => 'Top speed';
+
+  @override
+  String get deviceHealthAverageStride => 'Average stride';
+
+  @override
+  String get deviceHealthAverageCadence => 'Average cadence';
+
+  @override
+  String get deviceHealthMaximumCadence => 'Maximum cadence';
+
+  @override
+  String get deviceHealthAverageBloodOxygenDetail => 'Average blood oxygen';
+
+  @override
+  String get deviceHealthTotalAscent => 'Total ascent';
+
+  @override
+  String get deviceHealthTotalDescent => 'Total descent';
+
+  @override
+  String get deviceHealthAverageAltitude => 'Average altitude';
+
+  @override
+  String get deviceHealthAerobicEffect => 'Aerobic effect';
+
+  @override
+  String get deviceHealthAnaerobicEffect => 'Anaerobic effect';
+
+  @override
+  String get deviceHealthPeakEffect => 'Peak effect';
+
+  @override
+  String get deviceHealthVo2Max => 'VO₂ max';
+
+  @override
+  String get deviceHealthBodyEnergyUsed => 'Body energy used';
+
+  @override
+  String get deviceHealthExpectedRecovery => 'Recovery';
+
+  @override
+  String get deviceHealthTrainingLoad => 'Training load';
+
+  @override
+  String get deviceHealthVitalityEarned => 'Vitality earned';
+
+  @override
+  String get deviceHealthAveragePower => 'Average power';
+
+  @override
+  String get deviceHealthMaximumPower => 'Maximum power';
+
+  @override
+  String get deviceHealthArmPulls => 'Arm pulls';
+
+  @override
+  String get deviceHealthAverageStrokeRate => 'Average stroke rate';
+
+  @override
+  String get deviceHealthMaximumStrokeRate => 'Maximum stroke rate';
+
+  @override
+  String get deviceHealthTurns => 'Turns';
+
+  @override
+  String get deviceHealthAverageSwolf => 'Average SWOLF';
+
+  @override
+  String get deviceHealthBestSwolf => 'Best SWOLF';
+
+  @override
+  String get deviceHealthPoolLength => 'Pool length';
+
+  @override
+  String get deviceHealthJumps => 'Jumps';
+
+  @override
+  String get deviceHealthAverageJumpRate => 'Average jump rate';
+
+  @override
+  String get deviceHealthBestJumpRate => 'Best jump rate';
+
+  @override
+  String get deviceHealthTrips => 'Trips';
+
+  @override
+  String get deviceHealthSets => 'Sets';
+
+  @override
+  String get deviceHealthTotalStrokes => 'Total strokes';
+
+  @override
+  String get deviceHealthAverageRowingRate => 'Average rowing rate';
+
+  @override
+  String get deviceHealthBestRowingRate => 'Best rowing rate';
+
+  @override
+  String get deviceHealthChartHeartRate => 'Heart rate';
+
+  @override
+  String get deviceHealthChartCadence => 'Cadence';
+
+  @override
+  String get deviceHealthChartPace => 'Pace';
+
+  @override
+  String get deviceHealthChartSpeed => 'Speed';
+
+  @override
+  String get deviceHealthChartPower => 'Power';
+
+  @override
+  String get deviceHealthChartStrokeRate => 'Stroke rate';
+
+  @override
+  String get deviceHealthChartJumpRate => 'Jump rate';
+
+  @override
+  String get deviceHealthChartBloodOxygen => 'Blood oxygen';
+
+  @override
+  String get deviceHealthChartStress => 'Stress';
+
+  @override
+  String get deviceHealthWorkoutOutdoorRunning => 'Outdoor running';
+
+  @override
+  String get deviceHealthWorkoutOutdoorWalking => 'Outdoor walking';
+
+  @override
+  String get deviceHealthWorkoutIndoorRunning => 'Indoor running';
+
+  @override
+  String get deviceHealthWorkoutMountaineering => 'Mountaineering';
+
+  @override
+  String get deviceHealthWorkoutTrailRunning => 'Trail running';
+
+  @override
+  String get deviceHealthWorkoutOutdoorCycling => 'Outdoor cycling';
+
+  @override
+  String get deviceHealthWorkoutIndoorCycling => 'Indoor cycling';
+
+  @override
+  String get deviceHealthWorkoutFreeTraining => 'Free training';
+
+  @override
+  String get deviceHealthWorkoutSwimming => 'Swimming';
+
+  @override
+  String get deviceHealthWorkoutElliptical => 'Elliptical';
+
+  @override
+  String get deviceHealthWorkoutRowing => 'Rowing';
+
+  @override
+  String get deviceHealthWorkoutJumpRope => 'Jump rope';
+
+  @override
+  String get deviceHealthWorkoutHiking => 'Hiking';
+
+  @override
+  String get deviceHealthWorkoutGeneric => 'Workout';
+
+  @override
+  String get deviceHealthStrokeMedley => 'Medley';
+
+  @override
+  String get deviceHealthStrokeBreaststroke => 'Breaststroke';
+
+  @override
+  String get deviceHealthStrokeFreestyle => 'Freestyle';
+
+  @override
+  String get deviceHealthStrokeBackstroke => 'Backstroke';
+
+  @override
+  String get deviceHealthStrokeButterfly => 'Butterfly';
+
+  @override
+  String get deviceHealthSectionLabel => 'Section';
+
+  @override
+  String deviceHealthVitalityRunSuggestion(Object minutes) {
+    return 'Run for $minutes minutes toward the next target';
+  }
+
+  @override
+  String deviceHealthVitalityActiveMinutes(Object minutes) {
+    return '$minutes active minutes to the next target';
+  }
+
+  @override
+  String get deviceHealthLatestHeartRate => 'Latest heart rate';
+
+  @override
+  String get deviceHealthLatestBloodOxygen => 'Latest blood oxygen';
+
+  @override
+  String get deviceHealthLatestStress => 'Latest stress';
+
+  @override
+  String get deviceHealthDebugModeTitle => 'Health development mode';
+
+  @override
+  String get deviceHealthDebugModeDescription =>
+      'Enable health data snapshots and reload';
+
+  @override
+  String get deviceHealthDebugSnapshots => 'Snapshots';
+
+  @override
+  String get deviceHealthDebugSnapshotList => 'Snapshot list';
+
+  @override
+  String get deviceHealthDebugSnapshotsDescription =>
+      'Captured raw activity files that can be replayed without the watch';
+
+  @override
+  String get deviceHealthDebugRefresh => 'Refresh';
+
+  @override
+  String get deviceHealthDebugRefreshDescription =>
+      'Reload the saved snapshot list';
+
+  @override
+  String get deviceHealthDebugClearAll => 'Clear all';
+
+  @override
+  String get deviceHealthDebugClearAllDescription =>
+      'Delete every saved health snapshot';
+
+  @override
+  String get deviceHealthDebugNoSnapshots => 'No snapshots yet';
+
+  @override
+  String get deviceHealthDebugReload => 'Replay';
+
+  @override
+  String get deviceHealthDebugReloaded => 'Snapshot replayed';
+
+  @override
+  String deviceHealthDebugFiles(Object count) {
+    return '$count files';
+  }
+
+  @override
+  String get creatorAccounts => 'Accounts';
+
+  @override
+  String get creatorPendingItems => 'Pending';
+
+  @override
+  String get creatorResourceStatus => 'Resource status';
+
+  @override
+  String get creatorOverview => 'Overview';
+
+  @override
+  String get creatorManage => 'Manage';
+
+  @override
+  String get creatorManageUnavailable => 'Management is unavailable';
+
+  @override
+  String get creatorReviewTab => 'Reviews';
+
+  @override
+  String get creatorReviewQueue => 'Review queue';
+
+  @override
+  String get creatorReviewStatus => 'Review status';
+
+  @override
+  String get creatorReviewActive => 'Active';
+
+  @override
+  String get creatorReviewChangesRequested => 'Changes requested';
+
+  @override
+  String get creatorReviewDeclined => 'Rejected';
+
+  @override
+  String get creatorReviewClosed => 'Closed';
+
+  @override
+  String get creatorReviewFixedPending => 'Fixed, awaiting review';
+
+  @override
+  String get creatorNoPendingReviews => 'No pending reviews';
+
+  @override
+  String get creatorNoReviews => 'No reviews';
+
+  @override
+  String get creatorNeedsChanges => 'Needs changes';
+
+  @override
+  String get creatorConnected => 'Connected';
+
+  @override
+  String get creatorNotConnected => 'Not connected';
+
+  @override
+  String get creatorCenterExitTitle => 'Leave creator center';
+
+  @override
+  String get creatorCenterExitMessage =>
+      'Are you sure you want to leave the creator center';
+
+  @override
+  String get creatorEditComment => 'Edit comment';
+
+  @override
+  String get creatorReply => 'Reply';
+
+  @override
+  String creatorReplyingTo(Object id) {
+    return 'Replying to #$id';
+  }
+
+  @override
+  String creatorReplyPrefix(Object id) {
+    return 'Reply #$id: ';
+  }
+
+  @override
+  String get creatorSupplement => 'Additional note';
+
+  @override
+  String get creatorModifyResource => 'Modify resource';
+
+  @override
+  String get creatorAstroBoxReview => 'AstroBox review';
+
+  @override
+  String get creatorGithubPr => 'GitHub repository and PR';
+
+  @override
+  String get creatorApplyChanges => 'Apply changes';
+
+  @override
+  String get creatorUpdatedAt => 'Updated at';
+
+  @override
+  String get creatorSubmittedAt => 'Submitted at';
+
+  @override
+  String get creatorPublicationStatus => 'Publication status';
+
+  @override
+  String get creatorStageInfo => 'Edit info';
+
+  @override
+  String get creatorStageFiles => 'Bind files';
+
+  @override
+  String get creatorStagePublish => 'Publish config';
+
+  @override
+  String get creatorNextStep => 'Next step';
+
+  @override
+  String get creatorWatchfaceMissingId =>
+      'Watchface identification failed or all-zero: the watchface has no ID and cannot be uploaded';
+
+  @override
+  String get creatorWatchfaceZeroIdTitle =>
+      'All-zero watchface ID detected, please modify it before uploading';
+
+  @override
+  String get creatorWatchfacePayloadTooShort =>
+      'This watchface file is too small to contain an ID field';
+
+  @override
+  String get creatorQuickAppMissingPackage =>
+      'Quick app identification failed: the quick app has no package name and cannot be uploaded';
+
+  @override
+  String get creatorVelajsDefaultPackage =>
+      'Detected the quick app package name com.application.watch.demo, which is the VelaJS project default; please change it before uploading';
+
+  @override
+  String get creatorFilteredSupport => 'Filtered support';
+
+  @override
+  String get creatorSkippedPublication => 'Skipped publication';
+
+  @override
+  String get creatorAstroBoxUnsupportedDevicesNotice =>
+      'Some selected supported devices do not support publishing to AstroBox yet; their support declarations will be filtered out';
+
+  @override
+  String get creatorBandBbsUnsupportedDevicesNotice =>
+      'Some selected supported devices do not support publishing to BandBBS yet; their publication will be skipped';
+
+  @override
+  String get errorSppBondRemovalFailed =>
+      'On Android below 11 the system does not support removeBond. If the device disconnects frequently, switch to another device in Xiaomi Fitness or turn off its Nearby devices permission';
+
+  @override
+  String get viewAllResources => 'View all';
+
+  @override
+  String get deviceHealthMinimum => 'Minimum';
+
+  @override
+  String get deviceHealthMaximum => 'Maximum';
+
+  @override
+  String get deviceHealthResting => 'Resting';
+
+  @override
+  String get deviceHealthDebugExport => 'Export snapshot';
+
+  @override
+  String get deviceHealthDebugExportTooltip => 'Export raw activity files';
+
+  @override
+  String deviceHealthDebugExported(String path) {
+    return 'Exported to $path';
+  }
+
+  @override
+  String deviceHealthDebugExportFailed(String error) {
+    return 'Could not export snapshot: $error';
+  }
+
+  @override
+  String get deviceHealthDebugImport => 'Import';
+
+  @override
+  String get deviceHealthDebugImportDescription =>
+      'Import a previously exported snapshot file';
+
+  @override
+  String deviceHealthDebugImported(String deviceCode, int files) {
+    return 'Imported $deviceCode ($files files)';
+  }
+
+  @override
+  String deviceHealthDebugImportFailed(String error) {
+    return 'Could not import snapshot: $error';
   }
 }

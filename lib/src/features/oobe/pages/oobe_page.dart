@@ -1,6 +1,6 @@
 import 'package:segmented_list/segmented_list.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,6 +10,7 @@ import 'package:oronbox/src/app/generated/app_localizations.dart';
 import 'package:oronbox/src/app/utils/error_localization.dart';
 import 'package:oronbox/src/app/widgets/sys_app_bar.dart';
 import 'package:oronbox/src/app/widgets/app_icon.dart';
+import 'package:oronbox/src/app/widgets/markdown_style_sheet.dart';
 import 'package:oronbox/src/commands/command_protocol.dart';
 import 'package:oronbox/src/core/constants/style_constants.dart';
 import 'package:oronbox/src/core/network/app_http_transport.dart';
@@ -454,7 +455,7 @@ class _AgreementStepState extends State<_AgreementStep> {
                             data: data,
                             controller: _scrollController,
                             padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-                            styleSheet: MarkdownStyleSheet.fromTheme(theme)
+                            styleSheet: markdownStyleSheetFromTheme(theme)
                                 .copyWith(
                                   p: theme.textTheme.bodyMedium?.copyWith(
                                     height: 1.5,

@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:oronbox/src/app/widgets/sys_app_bar.dart';
+import 'package:oronbox/src/app/widgets/markdown_style_sheet.dart';
 import 'package:oronbox/src/core/constants/style_constants.dart';
 import 'package:oronbox/src/features/resources/widgets/resource_external_link.dart';
 
@@ -61,7 +62,7 @@ class LegalDocumentPage extends ConsumerWidget {
                       data: snapshot.data!,
                       selectable: true,
                       padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-                      styleSheet: MarkdownStyleSheet.fromTheme(theme).copyWith(
+                      styleSheet: markdownStyleSheetFromTheme(theme).copyWith(
                         p: theme.textTheme.bodyMedium?.copyWith(height: 1.5),
                         pPadding: const EdgeInsets.only(bottom: 12),
                         h1: theme.textTheme.headlineSmall?.copyWith(

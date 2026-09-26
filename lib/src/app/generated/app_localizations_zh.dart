@@ -1309,6 +1309,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceHealthHeartRate => '心率';
 
   @override
+  String get deviceHealthAverageHeartRateLabel => '平均心率';
+
+  @override
   String get deviceHealthRestingHeartRate => '静息心率';
 
   @override
@@ -1352,6 +1355,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get deviceHealthSleepStructure => '睡眠结构';
+
+  @override
+  String get deviceHealthSleepDetails => '睡眠详情';
 
   @override
   String get deviceHealthSleepAverageHeartRate => '睡眠平均心率';
@@ -4066,6 +4072,570 @@ class AppLocalizationsZh extends AppLocalizations {
   String xiaomiScreenshotSaved(Object path) {
     return '手表截图已保存至：$path';
   }
+
+  @override
+  String get deviceHealthRecoveryTime => '恢复时间';
+
+  @override
+  String get deviceHealthTodayLoad => '今日负荷';
+
+  @override
+  String get deviceHealthSevenDayLoad => '7 日负荷';
+
+  @override
+  String get deviceHealthLoadLevel => '负荷等级';
+
+  @override
+  String get deviceHealthFitnessBalance => '体能平衡';
+
+  @override
+  String get deviceHealthFitnessLevel => '体能水平';
+
+  @override
+  String get deviceHealthFatigueLevel => '疲劳水平';
+
+  @override
+  String get deviceHealthTrainingStress => '训练压力';
+
+  @override
+  String get deviceHealthTrainingStatus => '训练状态';
+
+  @override
+  String get deviceHealthSevenDayVitality => '近 7 日元气值';
+
+  @override
+  String get deviceHealthEarnedToday => '当日获得';
+
+  @override
+  String get deviceHealthEarnedInPeriod => '所选期间获得';
+
+  @override
+  String get deviceHealthModerateIntensity => '中等强度';
+
+  @override
+  String get deviceHealthHighIntensity => '高强度';
+
+  @override
+  String get deviceHealthNap => '小睡';
+
+  @override
+  String get deviceHealthNapSingular => '小睡';
+
+  @override
+  String get deviceHealthWorkoutOverview => '运动概览';
+
+  @override
+  String get deviceHealthWorkoutHistory => '历史记录';
+
+  @override
+  String get deviceHealthWorkoutDuration => '运动时长';
+
+  @override
+  String get deviceHealthWorkoutRoute => '运动路线';
+
+  @override
+  String get deviceHealthWorkoutDetails => '详细数据';
+
+  @override
+  String get deviceHealthSwimmingSections => '游泳分段';
+
+  @override
+  String get deviceHealthWorkoutCharts => '运动曲线';
+
+  @override
+  String get deviceHealthActiveDuration => '有效时长';
+
+  @override
+  String get deviceHealthAveragePace => '平均配速';
+
+  @override
+  String get deviceHealthBestPace => '最佳配速';
+
+  @override
+  String get deviceHealthHeartRateRange => '心率范围';
+
+  @override
+  String get deviceHealthBloodOxygenRange => '血氧范围';
+
+  @override
+  String get deviceHealthMainStroke => '主要泳姿';
+
+  @override
+  String get deviceHealthHeartRateZones => '心率区间';
+
+  @override
+  String deviceHealthZoneLabel(Object zone) {
+    return '区间 $zone';
+  }
+
+  @override
+  String get deviceHealthZoneWarmup => '热身';
+
+  @override
+  String get deviceHealthZoneFatBurning => '燃脂';
+
+  @override
+  String get deviceHealthZoneAerobic => '有氧';
+
+  @override
+  String get deviceHealthZoneAnaerobic => '无氧';
+
+  @override
+  String get deviceHealthZoneExtreme => '极限';
+
+  @override
+  String get deviceHealthRecoveryAfterWorkout => '运动后心率恢复';
+
+  @override
+  String get deviceHealthRecoveredHeartRate => '恢复心率';
+
+  @override
+  String get deviceHealthRecoveryRate => '恢复率';
+
+  @override
+  String get deviceHealthSamples => '采样点';
+
+  @override
+  String get deviceHealthAverageSpeed => '平均速度';
+
+  @override
+  String get deviceHealthTopSpeed => '最高速度';
+
+  @override
+  String get deviceHealthAverageStride => '平均步幅';
+
+  @override
+  String get deviceHealthAverageCadence => '平均步频';
+
+  @override
+  String get deviceHealthMaximumCadence => '最高步频';
+
+  @override
+  String get deviceHealthAverageBloodOxygenDetail => '平均血氧';
+
+  @override
+  String get deviceHealthTotalAscent => '累计上升';
+
+  @override
+  String get deviceHealthTotalDescent => '累计下降';
+
+  @override
+  String get deviceHealthAverageAltitude => '平均海拔';
+
+  @override
+  String get deviceHealthAerobicEffect => '有氧训练效果';
+
+  @override
+  String get deviceHealthAnaerobicEffect => '无氧训练效果';
+
+  @override
+  String get deviceHealthPeakEffect => '巅峰训练效果';
+
+  @override
+  String get deviceHealthVo2Max => '最大摄氧量';
+
+  @override
+  String get deviceHealthBodyEnergyUsed => '身体能量消耗';
+
+  @override
+  String get deviceHealthExpectedRecovery => '预计恢复';
+
+  @override
+  String get deviceHealthTrainingLoad => '训练负荷';
+
+  @override
+  String get deviceHealthVitalityEarned => '获得元气值';
+
+  @override
+  String get deviceHealthAveragePower => '平均功率';
+
+  @override
+  String get deviceHealthMaximumPower => '最大功率';
+
+  @override
+  String get deviceHealthArmPulls => '划水次数';
+
+  @override
+  String get deviceHealthAverageStrokeRate => '平均划频';
+
+  @override
+  String get deviceHealthMaximumStrokeRate => '最高划频';
+
+  @override
+  String get deviceHealthTurns => '转身次数';
+
+  @override
+  String get deviceHealthAverageSwolf => '平均 SWOLF';
+
+  @override
+  String get deviceHealthBestSwolf => '最佳 SWOLF';
+
+  @override
+  String get deviceHealthPoolLength => '泳池长度';
+
+  @override
+  String get deviceHealthJumps => '跳绳次数';
+
+  @override
+  String get deviceHealthAverageJumpRate => '平均跳频';
+
+  @override
+  String get deviceHealthBestJumpRate => '最佳跳频';
+
+  @override
+  String get deviceHealthTrips => '绊脚次数';
+
+  @override
+  String get deviceHealthSets => '组数';
+
+  @override
+  String get deviceHealthTotalStrokes => '总划次';
+
+  @override
+  String get deviceHealthAverageRowingRate => '平均桨频';
+
+  @override
+  String get deviceHealthBestRowingRate => '最佳桨频';
+
+  @override
+  String get deviceHealthChartHeartRate => '心率';
+
+  @override
+  String get deviceHealthChartCadence => '步频';
+
+  @override
+  String get deviceHealthChartPace => '配速';
+
+  @override
+  String get deviceHealthChartSpeed => '速度';
+
+  @override
+  String get deviceHealthChartPower => '功率';
+
+  @override
+  String get deviceHealthChartStrokeRate => '划频';
+
+  @override
+  String get deviceHealthChartJumpRate => '跳频';
+
+  @override
+  String get deviceHealthChartBloodOxygen => '血氧';
+
+  @override
+  String get deviceHealthChartStress => '压力';
+
+  @override
+  String get deviceHealthWorkoutOutdoorRunning => '户外跑步';
+
+  @override
+  String get deviceHealthWorkoutOutdoorWalking => '户外健走';
+
+  @override
+  String get deviceHealthWorkoutIndoorRunning => '室内跑步';
+
+  @override
+  String get deviceHealthWorkoutMountaineering => '登山';
+
+  @override
+  String get deviceHealthWorkoutTrailRunning => '越野跑';
+
+  @override
+  String get deviceHealthWorkoutOutdoorCycling => '户外骑行';
+
+  @override
+  String get deviceHealthWorkoutIndoorCycling => '室内骑行';
+
+  @override
+  String get deviceHealthWorkoutFreeTraining => '自由训练';
+
+  @override
+  String get deviceHealthWorkoutSwimming => '游泳';
+
+  @override
+  String get deviceHealthWorkoutElliptical => '椭圆机';
+
+  @override
+  String get deviceHealthWorkoutRowing => '划船机';
+
+  @override
+  String get deviceHealthWorkoutJumpRope => '跳绳';
+
+  @override
+  String get deviceHealthWorkoutHiking => '徒步';
+
+  @override
+  String get deviceHealthWorkoutGeneric => '运动';
+
+  @override
+  String get deviceHealthStrokeMedley => '混合泳';
+
+  @override
+  String get deviceHealthStrokeBreaststroke => '蛙泳';
+
+  @override
+  String get deviceHealthStrokeFreestyle => '自由泳';
+
+  @override
+  String get deviceHealthStrokeBackstroke => '仰泳';
+
+  @override
+  String get deviceHealthStrokeButterfly => '蝶泳';
+
+  @override
+  String get deviceHealthSectionLabel => '分段';
+
+  @override
+  String deviceHealthVitalityRunSuggestion(Object minutes) {
+    return '建议跑步 $minutes 分钟以接近下一个目标';
+  }
+
+  @override
+  String deviceHealthVitalityActiveMinutes(Object minutes) {
+    return '距离下一个目标还需 $minutes 分钟活动';
+  }
+
+  @override
+  String get deviceHealthLatestHeartRate => '最近心率';
+
+  @override
+  String get deviceHealthLatestBloodOxygen => '最近血氧';
+
+  @override
+  String get deviceHealthLatestStress => '最近压力';
+
+  @override
+  String get deviceHealthDebugModeTitle => '运动健康开发模式';
+
+  @override
+  String get deviceHealthDebugModeDescription => '启用运动健康数据快照与重载功能';
+
+  @override
+  String get deviceHealthDebugSnapshots => '快照';
+
+  @override
+  String get deviceHealthDebugSnapshotList => '快照列表';
+
+  @override
+  String get deviceHealthDebugSnapshotsDescription => '已捕获的原始活动文件，可在手表离线时重放';
+
+  @override
+  String get deviceHealthDebugRefresh => '刷新';
+
+  @override
+  String get deviceHealthDebugRefreshDescription => '重新读取已保存的快照列表';
+
+  @override
+  String get deviceHealthDebugClearAll => '全部清除';
+
+  @override
+  String get deviceHealthDebugClearAllDescription => '删除所有已保存的健康快照';
+
+  @override
+  String get deviceHealthDebugNoSnapshots => '暂无快照';
+
+  @override
+  String get deviceHealthDebugReload => '重放';
+
+  @override
+  String get deviceHealthDebugReloaded => '快照已重放';
+
+  @override
+  String deviceHealthDebugFiles(Object count) {
+    return '$count 个文件';
+  }
+
+  @override
+  String get creatorAccounts => '账号';
+
+  @override
+  String get creatorPendingItems => '待处理事项';
+
+  @override
+  String get creatorResourceStatus => '资源状态';
+
+  @override
+  String get creatorOverview => '概览';
+
+  @override
+  String get creatorManage => '管理';
+
+  @override
+  String get creatorManageUnavailable => '管理功能暂不可用';
+
+  @override
+  String get creatorReviewTab => '审核';
+
+  @override
+  String get creatorReviewQueue => '审核列表';
+
+  @override
+  String get creatorReviewStatus => '审核状态';
+
+  @override
+  String get creatorReviewActive => '进行中';
+
+  @override
+  String get creatorReviewChangesRequested => '需要修改';
+
+  @override
+  String get creatorReviewDeclined => '已拒绝';
+
+  @override
+  String get creatorReviewClosed => '已关闭';
+
+  @override
+  String get creatorReviewFixedPending => '已修复待复核';
+
+  @override
+  String get creatorNoPendingReviews => '暂无待审核';
+
+  @override
+  String get creatorNoReviews => '暂无审核';
+
+  @override
+  String get creatorNeedsChanges => '需要修改';
+
+  @override
+  String get creatorConnected => '已连接';
+
+  @override
+  String get creatorNotConnected => '未连接';
+
+  @override
+  String get creatorCenterExitTitle => '退出创作者中心';
+
+  @override
+  String get creatorCenterExitMessage => '确定要退出创作者中心吗？';
+
+  @override
+  String get creatorEditComment => '编辑评论';
+
+  @override
+  String get creatorReply => '回复';
+
+  @override
+  String creatorReplyingTo(Object id) {
+    return '正在回复 #$id';
+  }
+
+  @override
+  String creatorReplyPrefix(Object id) {
+    return '回复 #$id：';
+  }
+
+  @override
+  String get creatorSupplement => '补充说明';
+
+  @override
+  String get creatorModifyResource => '修改资源';
+
+  @override
+  String get creatorAstroBoxReview => 'AstroBox 审核';
+
+  @override
+  String get creatorGithubPr => 'GitHub 仓库与 PR';
+
+  @override
+  String get creatorApplyChanges => '应用修改';
+
+  @override
+  String get creatorUpdatedAt => '更新时间';
+
+  @override
+  String get creatorSubmittedAt => '提交时间';
+
+  @override
+  String get creatorPublicationStatus => '发布状态';
+
+  @override
+  String get creatorStageInfo => '编辑信息';
+
+  @override
+  String get creatorStageFiles => '文件绑定';
+
+  @override
+  String get creatorStagePublish => '发布配置';
+
+  @override
+  String get creatorNextStep => '下一步';
+
+  @override
+  String get creatorWatchfaceMissingId => '表盘识别失败或全零：表盘缺少 ID，无法上传';
+
+  @override
+  String get creatorWatchfaceZeroIdTitle => '识别到表盘 ID 为全零，请修改后上传';
+
+  @override
+  String get creatorWatchfacePayloadTooShort => '表盘文件过小，无法写入 ID 字段';
+
+  @override
+  String get creatorQuickAppMissingPackage => '快应用识别失败：快应用缺少包名，无法上传';
+
+  @override
+  String get creatorVelajsDefaultPackage =>
+      '识别到快应用包名为 com.application.watch.demo，这是 VelaJS 项目默认包名，请先修改后再上传';
+
+  @override
+  String get creatorFilteredSupport => '过滤支持';
+
+  @override
+  String get creatorSkippedPublication => '跳过发布';
+
+  @override
+  String get creatorAstroBoxUnsupportedDevicesNotice =>
+      '勾选的部分支持设备暂不支持同步发布到 AstroBox，将会过滤这部分设备的支持声明';
+
+  @override
+  String get creatorBandBbsUnsupportedDevicesNotice =>
+      '勾选的部分支持设备暂不支持同步发布到米坛社区，将会跳过这部分设备的发布';
+
+  @override
+  String get errorSppBondRemovalFailed =>
+      '安卓版本低于 11，系统不支持 removeBond，如果出现频繁断连，请先在小米运动健康中切换到其他设备，或关闭其“发现附近的设备”权限';
+
+  @override
+  String get viewAllResources => '查看全部';
+
+  @override
+  String get deviceHealthMinimum => '最低';
+
+  @override
+  String get deviceHealthMaximum => '最高';
+
+  @override
+  String get deviceHealthResting => '静息';
+
+  @override
+  String get deviceHealthDebugExport => '导出快照';
+
+  @override
+  String get deviceHealthDebugExportTooltip => '导出原始活动文件';
+
+  @override
+  String deviceHealthDebugExported(String path) {
+    return '已导出到 $path';
+  }
+
+  @override
+  String deviceHealthDebugExportFailed(String error) {
+    return '导出快照失败：$error';
+  }
+
+  @override
+  String get deviceHealthDebugImport => '导入';
+
+  @override
+  String get deviceHealthDebugImportDescription => '导入此前被导出的快照文件';
+
+  @override
+  String deviceHealthDebugImported(String deviceCode, int files) {
+    return '已导入 $deviceCode（$files 个文件）';
+  }
+
+  @override
+  String deviceHealthDebugImportFailed(String error) {
+    return '导入快照失败：$error';
+  }
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -5372,6 +5942,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get deviceHealthHeartRate => '心率';
 
   @override
+  String get deviceHealthAverageHeartRateLabel => '平均心率';
+
+  @override
   String get deviceHealthRestingHeartRate => '靜息心率';
 
   @override
@@ -5415,6 +5988,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get deviceHealthSleepStructure => '睡眠結構';
+
+  @override
+  String get deviceHealthSleepDetails => '睡眠詳情';
 
   @override
   String get deviceHealthSleepAverageHeartRate => '睡眠平均心率';
@@ -7807,5 +8383,569 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String xiaomiScreenshotSaved(Object path) {
     return '手錶截圖已儲存至：$path';
+  }
+
+  @override
+  String get deviceHealthRecoveryTime => '恢復時間';
+
+  @override
+  String get deviceHealthTodayLoad => '今日負荷';
+
+  @override
+  String get deviceHealthSevenDayLoad => '7 日負荷';
+
+  @override
+  String get deviceHealthLoadLevel => '負荷等級';
+
+  @override
+  String get deviceHealthFitnessBalance => '體能平衡';
+
+  @override
+  String get deviceHealthFitnessLevel => '體能水平';
+
+  @override
+  String get deviceHealthFatigueLevel => '疲勞水平';
+
+  @override
+  String get deviceHealthTrainingStress => '訓練壓力';
+
+  @override
+  String get deviceHealthTrainingStatus => '訓練狀態';
+
+  @override
+  String get deviceHealthSevenDayVitality => '近 7 日元氣值';
+
+  @override
+  String get deviceHealthEarnedToday => '當日獲得';
+
+  @override
+  String get deviceHealthEarnedInPeriod => '所選期間獲得';
+
+  @override
+  String get deviceHealthModerateIntensity => '中等強度';
+
+  @override
+  String get deviceHealthHighIntensity => '高強度';
+
+  @override
+  String get deviceHealthNap => '小睡';
+
+  @override
+  String get deviceHealthNapSingular => '小睡';
+
+  @override
+  String get deviceHealthWorkoutOverview => '運動概覽';
+
+  @override
+  String get deviceHealthWorkoutHistory => '歷史記錄';
+
+  @override
+  String get deviceHealthWorkoutDuration => '運動時長';
+
+  @override
+  String get deviceHealthWorkoutRoute => '運動路線';
+
+  @override
+  String get deviceHealthWorkoutDetails => '詳細數據';
+
+  @override
+  String get deviceHealthSwimmingSections => '游泳分段';
+
+  @override
+  String get deviceHealthWorkoutCharts => '運動曲線';
+
+  @override
+  String get deviceHealthActiveDuration => '有效時長';
+
+  @override
+  String get deviceHealthAveragePace => '平均配速';
+
+  @override
+  String get deviceHealthBestPace => '最佳配速';
+
+  @override
+  String get deviceHealthHeartRateRange => '心率範圍';
+
+  @override
+  String get deviceHealthBloodOxygenRange => '血氧範圍';
+
+  @override
+  String get deviceHealthMainStroke => '主要泳姿';
+
+  @override
+  String get deviceHealthHeartRateZones => '心率區間';
+
+  @override
+  String deviceHealthZoneLabel(Object zone) {
+    return '區間 $zone';
+  }
+
+  @override
+  String get deviceHealthZoneWarmup => '熱身';
+
+  @override
+  String get deviceHealthZoneFatBurning => '燃脂';
+
+  @override
+  String get deviceHealthZoneAerobic => '有氧';
+
+  @override
+  String get deviceHealthZoneAnaerobic => '無氧';
+
+  @override
+  String get deviceHealthZoneExtreme => '極限';
+
+  @override
+  String get deviceHealthRecoveryAfterWorkout => '運動後心率恢復';
+
+  @override
+  String get deviceHealthRecoveredHeartRate => '恢復心率';
+
+  @override
+  String get deviceHealthRecoveryRate => '恢復率';
+
+  @override
+  String get deviceHealthSamples => '採樣點';
+
+  @override
+  String get deviceHealthAverageSpeed => '平均速度';
+
+  @override
+  String get deviceHealthTopSpeed => '最高速度';
+
+  @override
+  String get deviceHealthAverageStride => '平均步幅';
+
+  @override
+  String get deviceHealthAverageCadence => '平均步頻';
+
+  @override
+  String get deviceHealthMaximumCadence => '最高步頻';
+
+  @override
+  String get deviceHealthAverageBloodOxygenDetail => '平均血氧';
+
+  @override
+  String get deviceHealthTotalAscent => '累計上升';
+
+  @override
+  String get deviceHealthTotalDescent => '累計下降';
+
+  @override
+  String get deviceHealthAverageAltitude => '平均海拔';
+
+  @override
+  String get deviceHealthAerobicEffect => '有氧訓練效果';
+
+  @override
+  String get deviceHealthAnaerobicEffect => '無氧訓練效果';
+
+  @override
+  String get deviceHealthPeakEffect => '巔峰訓練效果';
+
+  @override
+  String get deviceHealthVo2Max => '最大攝氧量';
+
+  @override
+  String get deviceHealthBodyEnergyUsed => '身體能量消耗';
+
+  @override
+  String get deviceHealthExpectedRecovery => '預計恢復';
+
+  @override
+  String get deviceHealthTrainingLoad => '訓練負荷';
+
+  @override
+  String get deviceHealthVitalityEarned => '獲得元氣值';
+
+  @override
+  String get deviceHealthAveragePower => '平均功率';
+
+  @override
+  String get deviceHealthMaximumPower => '最大功率';
+
+  @override
+  String get deviceHealthArmPulls => '划水次數';
+
+  @override
+  String get deviceHealthAverageStrokeRate => '平均划頻';
+
+  @override
+  String get deviceHealthMaximumStrokeRate => '最高划頻';
+
+  @override
+  String get deviceHealthTurns => '轉身次數';
+
+  @override
+  String get deviceHealthAverageSwolf => '平均 SWOLF';
+
+  @override
+  String get deviceHealthBestSwolf => '最佳 SWOLF';
+
+  @override
+  String get deviceHealthPoolLength => '泳池長度';
+
+  @override
+  String get deviceHealthJumps => '跳繩次數';
+
+  @override
+  String get deviceHealthAverageJumpRate => '平均跳頻';
+
+  @override
+  String get deviceHealthBestJumpRate => '最佳跳頻';
+
+  @override
+  String get deviceHealthTrips => '絆腳次數';
+
+  @override
+  String get deviceHealthSets => '組數';
+
+  @override
+  String get deviceHealthTotalStrokes => '總划次';
+
+  @override
+  String get deviceHealthAverageRowingRate => '平均槳頻';
+
+  @override
+  String get deviceHealthBestRowingRate => '最佳槳頻';
+
+  @override
+  String get deviceHealthChartHeartRate => '心率';
+
+  @override
+  String get deviceHealthChartCadence => '步頻';
+
+  @override
+  String get deviceHealthChartPace => '配速';
+
+  @override
+  String get deviceHealthChartSpeed => '速度';
+
+  @override
+  String get deviceHealthChartPower => '功率';
+
+  @override
+  String get deviceHealthChartStrokeRate => '划頻';
+
+  @override
+  String get deviceHealthChartJumpRate => '跳頻';
+
+  @override
+  String get deviceHealthChartBloodOxygen => '血氧';
+
+  @override
+  String get deviceHealthChartStress => '壓力';
+
+  @override
+  String get deviceHealthWorkoutOutdoorRunning => '戶外跑步';
+
+  @override
+  String get deviceHealthWorkoutOutdoorWalking => '戶外健走';
+
+  @override
+  String get deviceHealthWorkoutIndoorRunning => '室內跑步';
+
+  @override
+  String get deviceHealthWorkoutMountaineering => '登山';
+
+  @override
+  String get deviceHealthWorkoutTrailRunning => '越野跑';
+
+  @override
+  String get deviceHealthWorkoutOutdoorCycling => '戶外騎行';
+
+  @override
+  String get deviceHealthWorkoutIndoorCycling => '室內騎行';
+
+  @override
+  String get deviceHealthWorkoutFreeTraining => '自由訓練';
+
+  @override
+  String get deviceHealthWorkoutSwimming => '游泳';
+
+  @override
+  String get deviceHealthWorkoutElliptical => '橢圓機';
+
+  @override
+  String get deviceHealthWorkoutRowing => '划船機';
+
+  @override
+  String get deviceHealthWorkoutJumpRope => '跳繩';
+
+  @override
+  String get deviceHealthWorkoutHiking => '徒步';
+
+  @override
+  String get deviceHealthWorkoutGeneric => '運動';
+
+  @override
+  String get deviceHealthStrokeMedley => '混合泳';
+
+  @override
+  String get deviceHealthStrokeBreaststroke => '蛙泳';
+
+  @override
+  String get deviceHealthStrokeFreestyle => '自由泳';
+
+  @override
+  String get deviceHealthStrokeBackstroke => '仰泳';
+
+  @override
+  String get deviceHealthStrokeButterfly => '蝶泳';
+
+  @override
+  String get deviceHealthSectionLabel => '分段';
+
+  @override
+  String deviceHealthVitalityRunSuggestion(Object minutes) {
+    return '建議跑步 $minutes 分鐘以接近下一個目標';
+  }
+
+  @override
+  String deviceHealthVitalityActiveMinutes(Object minutes) {
+    return '距離下一個目標還需 $minutes 分鐘活動';
+  }
+
+  @override
+  String get deviceHealthLatestHeartRate => '最近心率';
+
+  @override
+  String get deviceHealthLatestBloodOxygen => '最近血氧';
+
+  @override
+  String get deviceHealthLatestStress => '最近壓力';
+
+  @override
+  String get deviceHealthDebugModeTitle => '運動健康開發模式';
+
+  @override
+  String get deviceHealthDebugModeDescription => '啟用運動健康資料快照與重載功能';
+
+  @override
+  String get deviceHealthDebugSnapshots => '快照';
+
+  @override
+  String get deviceHealthDebugSnapshotList => '快照清單';
+
+  @override
+  String get deviceHealthDebugSnapshotsDescription => '已擷取的原始活動檔案，可在手錶離線時重放';
+
+  @override
+  String get deviceHealthDebugRefresh => '重新整理';
+
+  @override
+  String get deviceHealthDebugRefreshDescription => '重新讀取已儲存的快照清單';
+
+  @override
+  String get deviceHealthDebugClearAll => '全部清除';
+
+  @override
+  String get deviceHealthDebugClearAllDescription => '刪除所有已儲存的健康快照';
+
+  @override
+  String get deviceHealthDebugNoSnapshots => '暫無快照';
+
+  @override
+  String get deviceHealthDebugReload => '重放';
+
+  @override
+  String get deviceHealthDebugReloaded => '快照已重放';
+
+  @override
+  String deviceHealthDebugFiles(Object count) {
+    return '$count 個檔案';
+  }
+
+  @override
+  String get creatorAccounts => '帳號';
+
+  @override
+  String get creatorPendingItems => '待處理事項';
+
+  @override
+  String get creatorResourceStatus => '資源狀態';
+
+  @override
+  String get creatorOverview => '總覽';
+
+  @override
+  String get creatorManage => '管理';
+
+  @override
+  String get creatorManageUnavailable => '管理功能暫不可用';
+
+  @override
+  String get creatorReviewTab => '審核';
+
+  @override
+  String get creatorReviewQueue => '審核清單';
+
+  @override
+  String get creatorReviewStatus => '審核狀態';
+
+  @override
+  String get creatorReviewActive => '進行中';
+
+  @override
+  String get creatorReviewChangesRequested => '需要修改';
+
+  @override
+  String get creatorReviewDeclined => '已拒絕';
+
+  @override
+  String get creatorReviewClosed => '已關閉';
+
+  @override
+  String get creatorReviewFixedPending => '已修復待複核';
+
+  @override
+  String get creatorNoPendingReviews => '暫無待審核';
+
+  @override
+  String get creatorNoReviews => '暫無審核';
+
+  @override
+  String get creatorNeedsChanges => '需要修改';
+
+  @override
+  String get creatorConnected => '已連接';
+
+  @override
+  String get creatorNotConnected => '未連接';
+
+  @override
+  String get creatorCenterExitTitle => '結束創作者中心';
+
+  @override
+  String get creatorCenterExitMessage => '確定要結束創作者中心嗎？';
+
+  @override
+  String get creatorEditComment => '編輯評論';
+
+  @override
+  String get creatorReply => '回覆';
+
+  @override
+  String creatorReplyingTo(Object id) {
+    return '正在回覆 #$id';
+  }
+
+  @override
+  String creatorReplyPrefix(Object id) {
+    return '回覆 #$id：';
+  }
+
+  @override
+  String get creatorSupplement => '補充說明';
+
+  @override
+  String get creatorModifyResource => '修改資源';
+
+  @override
+  String get creatorAstroBoxReview => 'AstroBox 審核';
+
+  @override
+  String get creatorGithubPr => 'GitHub 儲存庫與 PR';
+
+  @override
+  String get creatorApplyChanges => '套用修改';
+
+  @override
+  String get creatorUpdatedAt => '更新時間';
+
+  @override
+  String get creatorSubmittedAt => '提交時間';
+
+  @override
+  String get creatorPublicationStatus => '發佈狀態';
+
+  @override
+  String get creatorStageInfo => '編輯資訊';
+
+  @override
+  String get creatorStageFiles => '檔案綁定';
+
+  @override
+  String get creatorStagePublish => '發佈設定';
+
+  @override
+  String get creatorNextStep => '下一步';
+
+  @override
+  String get creatorWatchfaceMissingId => '錶盤辨識失敗或全為零：錶盤缺少 ID，無法上傳';
+
+  @override
+  String get creatorWatchfaceZeroIdTitle => '偵測到錶盤 ID 全為零，請修改後上傳';
+
+  @override
+  String get creatorWatchfacePayloadTooShort => '錶盤檔案過小，無法寫入 ID 欄位';
+
+  @override
+  String get creatorQuickAppMissingPackage => '快應用辨識失敗：快應用缺少套件名稱，無法上傳';
+
+  @override
+  String get creatorVelajsDefaultPackage =>
+      '偵測到快應用套件名為 com.application.watch.demo，這是 VelaJS 專案預設套件名，請先修改後再上傳';
+
+  @override
+  String get creatorFilteredSupport => '過濾支援';
+
+  @override
+  String get creatorSkippedPublication => '略過發佈';
+
+  @override
+  String get creatorAstroBoxUnsupportedDevicesNotice =>
+      '勾選的部分支援裝置暫不支援同步發佈到 AstroBox，將會過濾這部分裝置的支援宣告';
+
+  @override
+  String get creatorBandBbsUnsupportedDevicesNotice =>
+      '勾選的部分支援裝置暫不支援同步發佈到米壇社群，將會略過這部分裝置的發佈';
+
+  @override
+  String get errorSppBondRemovalFailed =>
+      '安卓版本低於 11，系統不支援 removeBond，如果出現頻繁斷連，請先在小米運動健康中切換到其他裝置，或關閉其「發現附近的裝置」權限';
+
+  @override
+  String get viewAllResources => '查看全部';
+
+  @override
+  String get deviceHealthMinimum => '最低';
+
+  @override
+  String get deviceHealthMaximum => '最高';
+
+  @override
+  String get deviceHealthResting => '靜息';
+
+  @override
+  String get deviceHealthDebugExport => '匯出快照';
+
+  @override
+  String get deviceHealthDebugExportTooltip => '匯出原始活動檔案';
+
+  @override
+  String deviceHealthDebugExported(String path) {
+    return '已匯出至 $path';
+  }
+
+  @override
+  String deviceHealthDebugExportFailed(String error) {
+    return '匯出快照失敗：$error';
+  }
+
+  @override
+  String get deviceHealthDebugImport => '匯入';
+
+  @override
+  String get deviceHealthDebugImportDescription => '匯入先前被匯出的快照檔案';
+
+  @override
+  String deviceHealthDebugImported(String deviceCode, int files) {
+    return '已匯入 $deviceCode（$files 個檔案）';
+  }
+
+  @override
+  String deviceHealthDebugImportFailed(String error) {
+    return '匯入快照失敗：$error';
   }
 }

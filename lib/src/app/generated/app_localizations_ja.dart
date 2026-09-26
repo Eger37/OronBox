@@ -1321,6 +1321,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get deviceHealthHeartRate => '心拍数';
 
   @override
+  String get deviceHealthAverageHeartRateLabel => '平均心拍数';
+
+  @override
   String get deviceHealthRestingHeartRate => '安静時心拍数';
 
   @override
@@ -1364,6 +1367,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get deviceHealthSleepStructure => '睡眠構造';
+
+  @override
+  String get deviceHealthSleepDetails => '睡眠の詳細';
 
   @override
   String get deviceHealthSleepAverageHeartRate => '睡眠中の平均心拍数';
@@ -4105,5 +4111,576 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String xiaomiScreenshotSaved(Object path) {
     return 'ウォッチのスクリーンショットを保存しました：$path';
+  }
+
+  @override
+  String get deviceHealthRecoveryTime => '回復時間';
+
+  @override
+  String get deviceHealthTodayLoad => '今日の負荷';
+
+  @override
+  String get deviceHealthSevenDayLoad => '7日間の負荷';
+
+  @override
+  String get deviceHealthLoadLevel => '負荷レベル';
+
+  @override
+  String get deviceHealthFitnessBalance => 'フィットネスバランス';
+
+  @override
+  String get deviceHealthFitnessLevel => 'フィットネス';
+
+  @override
+  String get deviceHealthFatigueLevel => '疲労';
+
+  @override
+  String get deviceHealthTrainingStress => 'トレーニングストレス';
+
+  @override
+  String get deviceHealthTrainingStatus => 'トレーニング状態';
+
+  @override
+  String get deviceHealthSevenDayVitality => '7日間の活力';
+
+  @override
+  String get deviceHealthEarnedToday => '当日獲得';
+
+  @override
+  String get deviceHealthEarnedInPeriod => '選択期間の獲得';
+
+  @override
+  String get deviceHealthModerateIntensity => '中強度';
+
+  @override
+  String get deviceHealthHighIntensity => '高強度';
+
+  @override
+  String get deviceHealthNap => '仮眠';
+
+  @override
+  String get deviceHealthNapSingular => '仮眠';
+
+  @override
+  String get deviceHealthWorkoutOverview => 'ワークアウト概要';
+
+  @override
+  String get deviceHealthWorkoutHistory => '履歴';
+
+  @override
+  String get deviceHealthWorkoutDuration => '時間';
+
+  @override
+  String get deviceHealthWorkoutRoute => 'ルート';
+
+  @override
+  String get deviceHealthWorkoutDetails => '詳細';
+
+  @override
+  String get deviceHealthSwimmingSections => '水泳セクション';
+
+  @override
+  String get deviceHealthWorkoutCharts => 'ワークアウトグラフ';
+
+  @override
+  String get deviceHealthActiveDuration => '有効時間';
+
+  @override
+  String get deviceHealthAveragePace => '平均ペース';
+
+  @override
+  String get deviceHealthBestPace => '最高ペース';
+
+  @override
+  String get deviceHealthHeartRateRange => '心拍範囲';
+
+  @override
+  String get deviceHealthBloodOxygenRange => '血中酸素範囲';
+
+  @override
+  String get deviceHealthMainStroke => '主な泳法';
+
+  @override
+  String get deviceHealthHeartRateZones => '心拍ゾーン';
+
+  @override
+  String deviceHealthZoneLabel(Object zone) {
+    return 'ゾーン $zone';
+  }
+
+  @override
+  String get deviceHealthZoneWarmup => 'ウォームアップ';
+
+  @override
+  String get deviceHealthZoneFatBurning => '脂肪燃焼';
+
+  @override
+  String get deviceHealthZoneAerobic => '有酸素';
+
+  @override
+  String get deviceHealthZoneAnaerobic => '無酸素';
+
+  @override
+  String get deviceHealthZoneExtreme => '極限';
+
+  @override
+  String get deviceHealthRecoveryAfterWorkout => '運動後の心拍回復';
+
+  @override
+  String get deviceHealthRecoveredHeartRate => '回復心拍';
+
+  @override
+  String get deviceHealthRecoveryRate => '回復率';
+
+  @override
+  String get deviceHealthSamples => 'サンプル';
+
+  @override
+  String get deviceHealthAverageSpeed => '平均速度';
+
+  @override
+  String get deviceHealthTopSpeed => '最高速度';
+
+  @override
+  String get deviceHealthAverageStride => '平均ストライド';
+
+  @override
+  String get deviceHealthAverageCadence => '平均ケイデンス';
+
+  @override
+  String get deviceHealthMaximumCadence => '最高ケイデンス';
+
+  @override
+  String get deviceHealthAverageBloodOxygenDetail => '平均血中酸素';
+
+  @override
+  String get deviceHealthTotalAscent => '累計上昇';
+
+  @override
+  String get deviceHealthTotalDescent => '累計下降';
+
+  @override
+  String get deviceHealthAverageAltitude => '平均高度';
+
+  @override
+  String get deviceHealthAerobicEffect => '有酸素効果';
+
+  @override
+  String get deviceHealthAnaerobicEffect => '無酸素効果';
+
+  @override
+  String get deviceHealthPeakEffect => 'ピーク効果';
+
+  @override
+  String get deviceHealthVo2Max => '最大酸素摂取量';
+
+  @override
+  String get deviceHealthBodyEnergyUsed => '身体エネルギー消費';
+
+  @override
+  String get deviceHealthExpectedRecovery => '回復見込み';
+
+  @override
+  String get deviceHealthTrainingLoad => 'トレーニング負荷';
+
+  @override
+  String get deviceHealthVitalityEarned => '獲得活力';
+
+  @override
+  String get deviceHealthAveragePower => '平均パワー';
+
+  @override
+  String get deviceHealthMaximumPower => '最大パワー';
+
+  @override
+  String get deviceHealthArmPulls => 'ストローク数';
+
+  @override
+  String get deviceHealthAverageStrokeRate => '平均ストローク率';
+
+  @override
+  String get deviceHealthMaximumStrokeRate => '最高ストローク率';
+
+  @override
+  String get deviceHealthTurns => 'ターン数';
+
+  @override
+  String get deviceHealthAverageSwolf => '平均 SWOLF';
+
+  @override
+  String get deviceHealthBestSwolf => '最高 SWOLF';
+
+  @override
+  String get deviceHealthPoolLength => 'プール長';
+
+  @override
+  String get deviceHealthJumps => 'ジャンプ数';
+
+  @override
+  String get deviceHealthAverageJumpRate => '平均ジャンプ率';
+
+  @override
+  String get deviceHealthBestJumpRate => '最高ジャンプ率';
+
+  @override
+  String get deviceHealthTrips => 'つまずき';
+
+  @override
+  String get deviceHealthSets => 'セット数';
+
+  @override
+  String get deviceHealthTotalStrokes => '総ストローク数';
+
+  @override
+  String get deviceHealthAverageRowingRate => '平均ストローク率';
+
+  @override
+  String get deviceHealthBestRowingRate => '最高ストローク率';
+
+  @override
+  String get deviceHealthChartHeartRate => '心拍数';
+
+  @override
+  String get deviceHealthChartCadence => 'ケイデンス';
+
+  @override
+  String get deviceHealthChartPace => 'ペース';
+
+  @override
+  String get deviceHealthChartSpeed => '速度';
+
+  @override
+  String get deviceHealthChartPower => 'パワー';
+
+  @override
+  String get deviceHealthChartStrokeRate => 'ストローク率';
+
+  @override
+  String get deviceHealthChartJumpRate => 'ジャンプ率';
+
+  @override
+  String get deviceHealthChartBloodOxygen => '血中酸素';
+
+  @override
+  String get deviceHealthChartStress => 'ストレス';
+
+  @override
+  String get deviceHealthWorkoutOutdoorRunning => '屋外ランニング';
+
+  @override
+  String get deviceHealthWorkoutOutdoorWalking => '屋外ウォーキング';
+
+  @override
+  String get deviceHealthWorkoutIndoorRunning => '屋内ランニング';
+
+  @override
+  String get deviceHealthWorkoutMountaineering => '登山';
+
+  @override
+  String get deviceHealthWorkoutTrailRunning => 'トレイルランニング';
+
+  @override
+  String get deviceHealthWorkoutOutdoorCycling => '屋外サイクリング';
+
+  @override
+  String get deviceHealthWorkoutIndoorCycling => '屋内サイクリング';
+
+  @override
+  String get deviceHealthWorkoutFreeTraining => 'フリートレーニング';
+
+  @override
+  String get deviceHealthWorkoutSwimming => '水泳';
+
+  @override
+  String get deviceHealthWorkoutElliptical => 'エリプティカル';
+
+  @override
+  String get deviceHealthWorkoutRowing => 'ローイング';
+
+  @override
+  String get deviceHealthWorkoutJumpRope => '縄跳び';
+
+  @override
+  String get deviceHealthWorkoutHiking => 'ハイキング';
+
+  @override
+  String get deviceHealthWorkoutGeneric => 'ワークアウト';
+
+  @override
+  String get deviceHealthStrokeMedley => 'メドレー';
+
+  @override
+  String get deviceHealthStrokeBreaststroke => '平泳ぎ';
+
+  @override
+  String get deviceHealthStrokeFreestyle => '自由形';
+
+  @override
+  String get deviceHealthStrokeBackstroke => '背泳ぎ';
+
+  @override
+  String get deviceHealthStrokeButterfly => 'バタフライ';
+
+  @override
+  String get deviceHealthSectionLabel => 'セクション';
+
+  @override
+  String deviceHealthVitalityRunSuggestion(Object minutes) {
+    return '次の目標まであと $minutes 分ランニング';
+  }
+
+  @override
+  String deviceHealthVitalityActiveMinutes(Object minutes) {
+    return '次の目標まであと $minutes 分の活動';
+  }
+
+  @override
+  String get deviceHealthLatestHeartRate => '最新の心拍数';
+
+  @override
+  String get deviceHealthLatestBloodOxygen => '最新の血中酸素';
+
+  @override
+  String get deviceHealthLatestStress => '最新のストレス';
+
+  @override
+  String get deviceHealthDebugModeTitle => 'ヘルスケア開発モード';
+
+  @override
+  String get deviceHealthDebugModeDescription =>
+      'ヘルスケアデータのスナップショットと再読み込みを有効にする';
+
+  @override
+  String get deviceHealthDebugSnapshots => 'スナップショット';
+
+  @override
+  String get deviceHealthDebugSnapshotList => 'スナップショット一覧';
+
+  @override
+  String get deviceHealthDebugSnapshotsDescription =>
+      '取得済みの生のアクティビティファイル。時計がオフラインでも再生できます';
+
+  @override
+  String get deviceHealthDebugRefresh => '更新';
+
+  @override
+  String get deviceHealthDebugRefreshDescription => '保存済みのスナップショット一覧を再読み込みします';
+
+  @override
+  String get deviceHealthDebugClearAll => 'すべて削除';
+
+  @override
+  String get deviceHealthDebugClearAllDescription =>
+      '保存済みのヘルススナップショットをすべて削除します';
+
+  @override
+  String get deviceHealthDebugNoSnapshots => 'スナップショットはまだありません';
+
+  @override
+  String get deviceHealthDebugReload => '再生';
+
+  @override
+  String get deviceHealthDebugReloaded => 'スナップショットを再生しました';
+
+  @override
+  String deviceHealthDebugFiles(Object count) {
+    return '$count 個のファイル';
+  }
+
+  @override
+  String get creatorAccounts => 'アカウント';
+
+  @override
+  String get creatorPendingItems => '対応が必要な項目';
+
+  @override
+  String get creatorResourceStatus => 'リソースの状態';
+
+  @override
+  String get creatorOverview => '概要';
+
+  @override
+  String get creatorManage => '管理';
+
+  @override
+  String get creatorManageUnavailable => '管理機能は現在利用できません';
+
+  @override
+  String get creatorReviewTab => '審査';
+
+  @override
+  String get creatorReviewQueue => '審査キュー';
+
+  @override
+  String get creatorReviewStatus => '審査状態';
+
+  @override
+  String get creatorReviewActive => '進行中';
+
+  @override
+  String get creatorReviewChangesRequested => '修正が必要';
+
+  @override
+  String get creatorReviewDeclined => '拒否済み';
+
+  @override
+  String get creatorReviewClosed => 'クローズ済み';
+
+  @override
+  String get creatorReviewFixedPending => '修正済み・再審査待ち';
+
+  @override
+  String get creatorNoPendingReviews => '保留中の審査はありません';
+
+  @override
+  String get creatorNoReviews => '審査はありません';
+
+  @override
+  String get creatorNeedsChanges => '修正が必要';
+
+  @override
+  String get creatorConnected => '接続済み';
+
+  @override
+  String get creatorNotConnected => '未接続';
+
+  @override
+  String get creatorCenterExitTitle => 'クリエイターセンターを終了';
+
+  @override
+  String get creatorCenterExitMessage => 'クリエイターセンターを終了してもよろしいですか？';
+
+  @override
+  String get creatorEditComment => 'コメントを編集';
+
+  @override
+  String get creatorReply => '返信';
+
+  @override
+  String creatorReplyingTo(Object id) {
+    return '#$id に返信中';
+  }
+
+  @override
+  String creatorReplyPrefix(Object id) {
+    return '返信 #$id: ';
+  }
+
+  @override
+  String get creatorSupplement => '補足';
+
+  @override
+  String get creatorModifyResource => 'リソースを修正';
+
+  @override
+  String get creatorAstroBoxReview => 'AstroBox 審査';
+
+  @override
+  String get creatorGithubPr => 'GitHub リポジトリと PR';
+
+  @override
+  String get creatorApplyChanges => '変更を適用';
+
+  @override
+  String get creatorUpdatedAt => '更新日時';
+
+  @override
+  String get creatorSubmittedAt => '提出日時';
+
+  @override
+  String get creatorPublicationStatus => '公開状態';
+
+  @override
+  String get creatorStageInfo => '情報の編集';
+
+  @override
+  String get creatorStageFiles => 'ファイルの紐付け';
+
+  @override
+  String get creatorStagePublish => '公開設定';
+
+  @override
+  String get creatorNextStep => '次へ';
+
+  @override
+  String get creatorWatchfaceMissingId =>
+      'ウォッチフェイスの認識に失敗、または全てゼロ：ID がないためアップロードできません';
+
+  @override
+  String get creatorWatchfaceZeroIdTitle =>
+      'ウォッチフェイス ID が全てゼロです。修正してからアップロードしてください';
+
+  @override
+  String get creatorWatchfacePayloadTooShort =>
+      'このウォッチフェイスファイルは小さすぎて ID フィールドを含できません';
+
+  @override
+  String get creatorQuickAppMissingPackage =>
+      'クイックアプリの認識に失敗：パッケージ名がないためアップロードできません';
+
+  @override
+  String get creatorVelajsDefaultPackage =>
+      'クイックアプリのパッケージ名が com.application.watch.demo です。これは VelaJS プロジェクトの既定値なので、変更してからアップロードしてください';
+
+  @override
+  String get creatorFilteredSupport => 'サポートを絞り込み';
+
+  @override
+  String get creatorSkippedPublication => '公開をスキップ';
+
+  @override
+  String get creatorAstroBoxUnsupportedDevicesNotice =>
+      '選択した一部の対応デバイスは AstroBox への同期公開に未対応のため、これらのサポート宣言を除外します';
+
+  @override
+  String get creatorBandBbsUnsupportedDevicesNotice =>
+      '選択した一部の対応デバイスは BandBBS への同期公開に未対応のため、これらの公開をスキップします';
+
+  @override
+  String get errorSppBondRemovalFailed =>
+      'Android 11 未満ではシステムが removeBond をサポートしていません。頻繁に切断される場合は、Xiaomi Fitness で別のデバイスに切り替えるか、「付近のデバイス」権限をオフにしてください';
+
+  @override
+  String get viewAllResources => 'すべて表示';
+
+  @override
+  String get deviceHealthMinimum => '最低';
+
+  @override
+  String get deviceHealthMaximum => '最高';
+
+  @override
+  String get deviceHealthResting => '安静時';
+
+  @override
+  String get deviceHealthDebugExport => 'スナップショットを書き出す';
+
+  @override
+  String get deviceHealthDebugExportTooltip => '生のアクティビティファイルを書き出す';
+
+  @override
+  String deviceHealthDebugExported(String path) {
+    return '$path に書き出しました';
+  }
+
+  @override
+  String deviceHealthDebugExportFailed(String error) {
+    return 'スナップショットの書き出しに失敗しました：$error';
+  }
+
+  @override
+  String get deviceHealthDebugImport => '取り込む';
+
+  @override
+  String get deviceHealthDebugImportDescription => '以前に書き出されたスナップショットファイルを取り込む';
+
+  @override
+  String deviceHealthDebugImported(String deviceCode, int files) {
+    return '$deviceCode（$files ファイル）を取り込みました';
+  }
+
+  @override
+  String deviceHealthDebugImportFailed(String error) {
+    return 'スナップショットの取り込みに失敗しました：$error';
   }
 }

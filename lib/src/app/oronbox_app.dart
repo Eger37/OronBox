@@ -1,11 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:oronbox/src/app/router/app_router.dart';
 import 'package:oronbox/src/app/window/desktop_window_host.dart';
 import 'package:oronbox/src/app/theme/app_theme.dart';
-import 'package:oronbox/src/app/theme/dynamic_color_adapter.dart';
 import 'package:oronbox/src/app/theme/system_accent_color.dart';
+import 'package:oronbox/src/app/app_localizations_delegates.dart';
 import 'package:oronbox/src/app/generated/app_localizations.dart';
 import 'package:oronbox/src/core/providers/theme_locale_providers.dart';
 import 'package:oronbox/src/features/devices/services/xiaomi_automatic_sync_service.dart';
@@ -15,7 +15,6 @@ import 'package:oronbox/src/features/devices/widgets/xms_wearable_bridge.dart';
 import 'package:oronbox/src/features/plugins/widgets/plugin_host_request_handler.dart';
 import 'package:oronbox/src/features/settings/services/update_check_service.dart';
 import 'package:oronbox/src/app/widgets/app_error_gate.dart';
-import 'package:material_ui/material_ui.dart' as material_ui;
 
 final _desktopAccentColorProvider = FutureProvider<Color?>((ref) {
   final source = ref.watch(
@@ -39,61 +38,47 @@ class OronBoxApp extends ConsumerWidget {
         .maybeWhen(data: (color) => color, orElse: () => null);
 
     return DynamicColorBuilder(
-      builder:
-          (
-            material_ui.ColorScheme? lightDynamic,
-            material_ui.ColorScheme? darkDynamic,
-          ) {
-            final lightFlutterDynamic = toFlutterColorScheme(lightDynamic);
-            final darkFlutterDynamic = toFlutterColorScheme(darkDynamic);
-            final useDynamicColor = themeSettings.useDynamicColor;
-            final lightColorScheme = useDynamicColor
-                ? lightFlutterDynamic ??
-                      _desktopColorScheme(desktopAccentColor, Brightness.light)
-                : _seedColorScheme(
-                    themeSettings.customSeedColor,
-                    Brightness.light,
-                  );
-            final darkColorScheme = useDynamicColor
-                ? darkFlutterDynamic ??
-                      _desktopColorScheme(desktopAccentColor, Brightness.dark)
-                : _seedColorScheme(
-                    themeSettings.customSeedColor,
-                    Brightness.dark,
-                  );
-
-            return MaterialApp.router(
-              title: 'OronBox',
-              debugShowCheckedModeBanner: false,
-              theme: AppTheme.buildLightTheme(colorScheme: lightColorScheme),
-              darkTheme: themeSettings.isOledDark
-                  ? AppTheme.buildOledDarkTheme(colorScheme: darkColorScheme)
-                  : AppTheme.buildDarkTheme(colorScheme: darkColorScheme),
-              themeMode: themeSettings.materialThemeMode,
-              locale: localeSettings.materialLocale,
-              localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              scaffoldMessengerKey: appScaffoldMessengerKey,
-              routerConfig: router,
-              builder: (context, child) => DesktopWindowHost(
-                child: AppErrorGate(
-                  child: PluginHostRequestHandler(
-                    child: XmsWearableBridge(
-                      child: UpdateCheckHandler(
-                        child: FileOpenHandler(
-                          child: XiaomiAutomaticSyncScheduler(
-                            child: DeviceDeepLinkHandler(
-                              child: child ?? const SizedBox.shrink(),
-                            ),
-                          ),
+      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+        final useDynamicColor = themeSettings.useDynamicColor;
+        final lightColorScheme = useDynamicColor
+            ? lightDynamic ??
+                  _desktopColorScheme(desktopAccentColor, Brightness.light)
+            : _seedColorScheme(themeSettings.customSeedColor, Brightness.light);
+        final darkColorScheme = useDynamicColor
+            ? darkDynamic ??
+                  _desktopColorScheme(desktopAccentColor, Brightness.dark)
+            : _seedColorScheme(themeSettings.customSeedColor, Brightness.dark);
+        return MaterialApp.router(
+          title: 'OronBox',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.buildLightTheme(colorScheme: lightColorScheme),
+          darkTheme: themeSettings.isOledDark
+              ? AppTheme.buildOledDarkTheme(colorScheme: darkColorScheme)
+              : AppTheme.buildDarkTheme(colorScheme: darkColorScheme),
+          themeMode: themeSettings.materialThemeMode,
+          locale: localeSettings.materialLocale,
+          localizationsDelegates: appLocalizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+          builder: (context, child) => DesktopWindowHost(
+            child: AppErrorGate(
+              child: PluginHostRequestHandler(
+                child: XmsWearableBridge(
+                  child: UpdateCheckHandler(
+                    child: FileOpenHandler(
+                      child: XiaomiAutomaticSyncScheduler(
+                        child: DeviceDeepLinkHandler(
+                          child: child ?? const SizedBox.shrink(),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-            );
-          },
+            ),
+          ),
+        );
+      },
     );
   }
 

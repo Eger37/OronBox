@@ -1,6 +1,6 @@
 import 'package:segmented_list/segmented_list.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
@@ -22,6 +22,8 @@ import 'package:oronbox/src/features/resources/application/creator/creator_works
 import 'package:oronbox/src/features/resources/pages/creator/creator_shared.dart';
 import 'package:oronbox/src/features/accounts/application/host_accounts.dart';
 import 'package:oronbox/src/features/accounts/services/mi_account_two_factor_resolver.dart';
+import 'package:oronbox/src/features/devices/services/xiaomi_sync_preferences.dart';
+import 'package:oronbox/src/features/devices/widgets/xiaomi_fitness_logo.dart';
 
 final _desktopExitBehaviorProvider = Provider<int?>((ref) {
   return SharedPrefsService.instance.getInt('desktop.exit_behavior');
@@ -531,6 +533,15 @@ class SettingsPage extends ConsumerWidget {
                           : l10n.devToolsDescriptionEntry,
                     ),
                   ),
+                SegmentedTile.switchTile(
+                  onToggle: (value) => ref
+                      .read(xiaomiHealthDebugModeProvider.notifier)
+                      .setEnabled(value ?? false),
+                  initialValue: ref.watch(xiaomiHealthDebugModeProvider),
+                  leading: const XiaomiFitnessLogo(),
+                  title: Text(l10n.deviceHealthDebugModeTitle),
+                  description: Text(l10n.deviceHealthDebugModeDescription),
+                ),
                 if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android)
                   SegmentedTile.switchTile(
                     onToggle: (value) => ref
