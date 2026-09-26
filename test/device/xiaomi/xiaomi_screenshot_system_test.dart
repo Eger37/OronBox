@@ -254,6 +254,72 @@ void main() {
       eventBus.dispose();
     },
   );
+
+  test(
+    'keeps a screenshot transfer alive when a segment is retransmitted',
+    () async {
+      final transport = _FakeTransport();
+      final eventBus = DeviceEventBus();
+      final entity = DeviceEntity(
+        id: 'test-device',
+        kind: 'xiaomi',
+        transport: transport,
+        eventBus: eventBus,
+      );
+      final component = XiaomiDeviceComponent(
+        transport: transport,
+        sppV1: true,
+      );
+      final system = XiaomiScreenshotSystem();
+      entity.set(component);
+      entity.registerSystem(system);
+
+      final screenshotEvent = eventBus.stream
+          .where((event) => event is XiaomiScreenshotReceived)
+          .cast<XiaomiScreenshotReceived>()
+          .first;
+      final permission = Uint8List.fromList([
+        ..._fieldVarint(1, 2),
+        ..._fieldVarint(2, 0),
+      ]);
+      final packet = Uint8List.fromList([
+        ..._fieldVarint(1, 2),
+        ..._fieldVarint(2, 112),
+        ..._fieldBytes(4, _fieldBytes(74, _fieldBytes(1, permission))),
+      ]);
+      system.onLayer2Packet(L2Channel.pb, L2OpCode.write, packet);
+      await Future<void>.delayed(Duration.zero);
+
+      final image = Uint8List.fromList(const [
+        0x89,
+        0x50,
+        0x4e,
+        0x47,
+        0x0d,
+        0x0a,
+        0x1a,
+        0x0a,
+      ]);
+      final content = Uint8List.fromList([0, ...List.filled(5, 0), ...image]);
+      final merged = Uint8List.fromList([
+        ...content,
+        ..._uint32Le(_crc32(content)),
+      ]);
+      final split = merged.length ~/ 2;
+      final first = _segment(2, 1, Uint8List.sublistView(merged, 0, split));
+      system.onLayer2Packet(L2Channel.mass, L2OpCode.write, first);
+      system.onLayer2Packet(L2Channel.mass, L2OpCode.write, first);
+      system.onLayer2Packet(
+        L2Channel.mass,
+        L2OpCode.write,
+        _segment(2, 2, Uint8List.sublistView(merged, split)),
+      );
+
+      expect((await screenshotEvent).bytes, image);
+      await entity.dispose();
+      eventBus.dispose();
+    },
+  );
 }
 
 Uint8List _segment(int total, int sequence, Uint8List payload) =>

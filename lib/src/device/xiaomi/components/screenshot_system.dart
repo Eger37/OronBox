@@ -32,6 +32,7 @@ class XiaomiScreenshotSystem extends XiaomiSystem {
   int? _totalSegments;
   int _currentSegment = 0;
   XiaomiTraceOperation? _operation;
+  Future<void>? _permissionResponseInFlight;
 
   bool _negotiationSent = false;
 
@@ -84,6 +85,15 @@ class XiaomiScreenshotSystem extends XiaomiSystem {
   }
 
   void abortPending([Object? reason, StackTrace? stackTrace]) {
+    final hasPendingTransfer =
+        _timeoutTimer != null ||
+        _operation != null ||
+        _segments.isNotEmpty ||
+        _permissionResponseInFlight != null;
+    if (!hasPendingTransfer) {
+      _resetAssembly();
+      return;
+    }
     _log.warning(
       '[${entity.id}] aborting pending Xiaomi screenshot transfer',
       reason,
@@ -129,9 +139,23 @@ class XiaomiScreenshotSystem extends XiaomiSystem {
         '[${entity.id}] Xiaomi screenshot transfer started: '
         'segments=$total',
       );
+    } else if (_totalSegments != total && sequence == 1) {
+      // A device may restart the transfer after a lost response. Treat a new
+      // first segment as a fresh transfer instead of poisoning the old one.
+      _log.info(
+        '[${entity.id}] Xiaomi screenshot transfer restarted: segments=$total',
+      );
+      _resetAssembly();
+      _totalSegments = total;
     } else if (_totalSegments != total) {
       _log.warning('[${entity.id}] Xiaomi screenshot segment total changed');
-      _resetAssembly();
+      return;
+    }
+    if (sequence <= _currentSegment) {
+      _log.fine(
+        '[${entity.id}] ignoring duplicate Xiaomi screenshot segment '
+        'sequence=$sequence current=$_currentSegment',
+      );
       return;
     }
     if (sequence != _currentSegment + 1) {
@@ -139,7 +163,6 @@ class XiaomiScreenshotSystem extends XiaomiSystem {
         '[${entity.id}] Xiaomi screenshot segment out of order '
         'sequence=$sequence expected=${_currentSegment + 1}',
       );
-      _resetAssembly();
       return;
     }
 
@@ -189,6 +212,9 @@ class XiaomiScreenshotSystem extends XiaomiSystem {
   }
 
   void _startAssembly() {
+    // Duplicate permission requests are retransmissions. Keep already
+    // received data so a repeated request cannot discard a live transfer.
+    if (_timeoutTimer != null) return;
     _resetAssembly();
     _timeoutTimer?.cancel();
     _timeoutTimer = Timer(_timeout, () {
@@ -216,8 +242,15 @@ class XiaomiScreenshotSystem extends XiaomiSystem {
   }
 
   Future<void> _respondToPermissionRequest() async {
+    final inFlight = _permissionResponseInFlight;
+    if (inFlight != null) {
+      await inFlight;
+      return;
+    }
+    final response = _sendPermissionResponse(granted: true);
+    _permissionResponseInFlight = response;
     try {
-      await _sendPermissionResponse(granted: true);
+      await response;
       _operation?.step(
         'permission_response_sent',
         data: {'command': _permissionResponse, 'granted': true},
@@ -230,6 +263,10 @@ class XiaomiScreenshotSystem extends XiaomiSystem {
         error,
       );
       _completeError(error, stackTrace);
+    } finally {
+      if (identical(_permissionResponseInFlight, response)) {
+        _permissionResponseInFlight = null;
+      }
     }
   }
 
@@ -360,6 +397,7 @@ class XiaomiScreenshotSystem extends XiaomiSystem {
     );
     _operation?.fail(error);
     _operation = null;
+    _resetAssembly();
   }
 
   void _resetAssembly() {

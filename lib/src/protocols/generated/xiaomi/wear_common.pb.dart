@@ -111,8 +111,8 @@ class Timezone extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'Timezone',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'protocol'),
       createEmptyInstance: create)
-    ..aI(1, _omitFieldNames ? '' : 'offset', fieldType: $pb.PbFieldType.Q3)
-    ..aI(2, _omitFieldNames ? '' : 'dstSaving')
+    ..aI(1, _omitFieldNames ? '' : 'offset', fieldType: $pb.PbFieldType.QS3)
+    ..aI(2, _omitFieldNames ? '' : 'dstSaving', fieldType: $pb.PbFieldType.OS3)
     ..aQS(3, _omitFieldNames ? '' : 'id')
     ..aQS(4, _omitFieldNames ? '' : 'idSpec');
 

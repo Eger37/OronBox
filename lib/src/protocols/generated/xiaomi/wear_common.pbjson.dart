@@ -900,8 +900,8 @@ final $typed_data.Uint8List clockHolidayDescriptor = $convert.base64Decode(
 const Timezone$json = {
   '1': 'Timezone',
   '2': [
-    {'1': 'offset', '3': 1, '4': 2, '5': 5, '10': 'offset'},
-    {'1': 'dst_saving', '3': 2, '4': 1, '5': 5, '10': 'dstSaving'},
+    {'1': 'offset', '3': 1, '4': 2, '5': 17, '10': 'offset'},
+    {'1': 'dst_saving', '3': 2, '4': 1, '5': 17, '10': 'dstSaving'},
     {'1': 'id', '3': 3, '4': 2, '5': 9, '10': 'id'},
     {'1': 'id_spec', '3': 4, '4': 2, '5': 9, '10': 'idSpec'},
   ],
@@ -909,7 +909,7 @@ const Timezone$json = {
 
 /// Descriptor for `Timezone`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List timezoneDescriptor = $convert.base64Decode(
-    'CghUaW1lem9uZRIWCgZvZmZzZXQYASACKAVSBm9mZnNldBIdCgpkc3Rfc2F2aW5nGAIgASgFUg'
+    'CghUaW1lem9uZRIWCgZvZmZzZXQYASACKBFSBm9mZnNldBIdCgpkc3Rfc2F2aW5nGAIgASgRUg'
     'lkc3RTYXZpbmcSDgoCaWQYAyACKAlSAmlkEhcKB2lkX3NwZWMYBCACKAlSBmlkU3BlYw==');
 
 @$core.Deprecated('Use dateDescriptor instead')
