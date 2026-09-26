@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:oronbox/src/app/generated/app_localizations.dart';
@@ -110,6 +110,18 @@ class InboxPage extends ConsumerWidget {
                                     .read(messageCenterProvider.notifier)
                                     .read(message.id);
                                 if (message.targetResourceId.isEmpty) {
+                                  if (message.targetReviewId.isNotEmpty) {
+                                    context.go(
+                                      '/resources/creator/reviews/${Uri.encodeComponent(message.targetReviewId)}',
+                                    );
+                                  }
+                                  await read;
+                                  return;
+                                }
+                                if (message.targetReviewId.isNotEmpty) {
+                                  context.go(
+                                    '/resources/creator/reviews/${Uri.encodeComponent(message.targetReviewId)}',
+                                  );
                                   await read;
                                   return;
                                 }

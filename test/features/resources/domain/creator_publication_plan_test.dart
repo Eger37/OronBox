@@ -152,6 +152,32 @@ void main() {
     expect(plan.unmappedDeviceNames, ['Xiaomi Smart Band 10 NFC']);
   });
 
+  test('blocks BandBBS when any selected device is unmapped', () {
+    final plan = buildCreatorPublicationPlan(
+      workspace: _workspace(
+        artifacts: {
+          'artifact': const ['n67', 'unknown-device'],
+        },
+      ),
+      devices: const [
+        CreatorDevice(id: 'n67', codename: 'n67', name: 'Band 9 Pro'),
+        CreatorDevice(
+          id: 'unknown-device',
+          codename: 'unknown-device',
+          name: 'Unknown Device',
+        ),
+      ],
+      bandBbsCategories: const [
+        {'id': 1, 'title': '小米手环9 Pro', 'children': []},
+      ],
+    );
+
+    expect(plan.bandBbsTargets, isEmpty);
+    expect(plan.bandBbsProblem, CreatorBandBbsPlanProblem.unmappedDevices);
+    expect(plan.unmappedDeviceNames, ['Unknown Device']);
+    expect(plan.canPublishToBandBbs, isFalse);
+  });
+
   test('rejects multiple artifacts sharing one category', () {
     final plan = buildCreatorPublicationPlan(
       workspace: _workspace(

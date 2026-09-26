@@ -1,34 +1,91 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:segmented_list/segmented_list.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:oronbox/src/app/generated/app_localizations.dart';
 import 'package:oronbox/src/app/widgets/sys_app_bar.dart';
 import 'package:oronbox/src/app/widgets/stable_fab.dart';
+import 'package:oronbox/src/app/widgets/markdown_style_sheet.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:oronbox/src/core/services/shared_prefs_service.dart';
+import 'package:oronbox/src/core/constants/style_constants.dart';
 import 'package:oronbox/src/features/accounts/application/host_accounts.dart';
 import 'package:oronbox/src/features/resources/application/creator/creator_workspace_controller.dart';
 import 'package:oronbox/src/features/resources/pages/creator/creator_resource_list.dart';
+import 'package:oronbox/src/features/resources/pages/creator/creator_review_list_page.dart';
 import 'package:oronbox/src/features/resources/pages/creator/creator_shared.dart';
 import 'package:oronbox/src/features/settings/pages/legal_documents_page.dart';
 
 class CreatorCenterPage extends ConsumerStatefulWidget {
-  const CreatorCenterPage({super.key});
+  const CreatorCenterPage({
+    super.key,
+    this.initialTab = 0,
+    this.initialReviewFilter,
+  });
+  final int initialTab;
+  final String? initialReviewFilter;
 
   @override
   ConsumerState<CreatorCenterPage> createState() => _CreatorCenterPageState();
 }
 
 class _CreatorCenterPageState extends ConsumerState<CreatorCenterPage> {
+  int get _tab => widget.initialTab;
   Set<String> _selectedResourceIds = const {};
   var _authorizingBandBbs = false;
   var _authorizingGitHub = false;
 
   Future<void> _refresh(CreatorWorkspaceController controller) async {
-    await controller.refresh();
+    await Future.wait([
+      controller.refresh(),
+      ref.read(hostAccountsProvider.notifier).refresh(),
+    ]);
+  }
+
+  Future<void> _confirmExit() async {
+    final l10n = AppLocalizations.of(context)!;
+    final leave = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.creatorCenterExitTitle),
+        content: Text(l10n.creatorCenterExitMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text(l10n.creatorConfirm),
+          ),
+        ],
+      ),
+    );
+    if (leave == true && mounted) context.pop();
+  }
+
+  void _handleBack() {
+    if (widget.initialTab == 0) {
+      unawaited(_confirmExit());
+    } else {
+      context.replace('/resources/creator');
+    }
+  }
+
+  void _switchTab(int index, {String? reviewFilter}) {
+    if (index == _tab && reviewFilter == null) return;
+    final location = switch (index) {
+      1 => '/resources/creator/resources',
+      2 =>
+        '/resources/creator/reviews'
+            '${reviewFilter == null ? '' : '?filter=${Uri.encodeComponent(reviewFilter)}'}',
+      3 => '/resources/creator/manage',
+      _ => '/resources/creator',
+    };
+    context.replace(location);
   }
 
   @override
@@ -36,74 +93,130 @@ class _CreatorCenterPageState extends ConsumerState<CreatorCenterPage> {
     final state = ref.watch(creatorWorkspaceProvider);
     final controller = ref.read(creatorWorkspaceProvider.notifier);
     final bandBbs = ref.watch(hostAccountsProvider).bandbbs;
+    final roleState = ref.watch(currentUserRoleProvider);
+    final isAdmin = roleState.value == 'admin';
     final l10n = AppLocalizations.of(context)!;
+    if (widget.initialTab == 3 && !roleState.hasValue) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (widget.initialTab == 3 && !isAdmin) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) context.replace('/resources/creator');
+      });
+      return const SizedBox.shrink();
+    }
     ref.listen(
-      hostAccountsProvider.select(
-        (value) => (value.bandbbs.isSignedIn, value.revision),
-      ),
+      hostAccountsProvider.select((value) => value.bandbbs.isSignedIn),
       (previous, current) {
-        if (previous != current && current.$1) {
+        if (previous != current && current) {
           unawaited(_refresh(controller));
         }
       },
     );
-    return Scaffold(
-      appBar: SysAppBar(
-        secondary: true,
-        title: Text(l10n.creatorCenter),
-        actions: [
-          IconButton(
-            tooltip: l10n.refresh,
-            icon: const Icon(Icons.refresh),
-            onPressed: state.loading
-                ? null
-                : () => unawaited(_refresh(controller)),
-          ),
-        ],
-      ),
-      body: !bandBbs.isSignedIn
-          ? _CreatorLoginGate(
-              busy: bandBbs.isBusy,
-              onLogin: ref
-                  .read(hostAccountsProvider.notifier)
-                  .startBandBbsLogin,
-            )
-          : state.governance != null
-          ? _CreatorGovernanceGate(code: state.governance!)
-          : _CreatorTermsGate(
-              loading: state.loading,
-              onCreate: () => _openCreateWizard(context, controller),
-              selectionActive: _selectedResourceIds.isNotEmpty,
-              onMoveSelection: () => _moveSelection(state, controller),
-              floatingAccess: _PublishingAccessCard(
-                grants: state.grants,
-                bandBbsBusy: _authorizingBandBbs,
-                githubBusy: _authorizingGitHub,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (!didPop) _handleBack();
+      },
+      child: Scaffold(
+        appBar: SysAppBar(
+          secondary: true,
+          leading: BackButton(onPressed: _handleBack),
+          title: Text(l10n.creatorCenter),
+          actions: [
+            IconButton(
+              tooltip: l10n.refresh,
+              icon: const Icon(Icons.refresh),
+              onPressed: state.loading
+                  ? null
+                  : () => unawaited(_refresh(controller)),
+            ),
+            IconButton(
+              tooltip: l10n.notifications,
+              icon: const Icon(Icons.notifications_none_outlined),
+              onPressed: () => context.push('/inbox'),
+            ),
+          ],
+        ),
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _tab,
+          onDestinationSelected: _switchTab,
+          destinations: [
+            NavigationDestination(
+              icon: const Icon(Icons.grid_view_outlined),
+              selectedIcon: const Icon(Icons.grid_view),
+              label: l10n.creatorOverview,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.apps_outlined),
+              selectedIcon: const Icon(Icons.apps),
+              label: l10n.resources,
+            ),
+            NavigationDestination(
+              icon: const Icon(Icons.edit_outlined),
+              selectedIcon: const Icon(Icons.edit),
+              label: l10n.creatorReviewTab,
+            ),
+            if (isAdmin)
+              NavigationDestination(
+                icon: const Icon(Icons.person_outline),
+                selectedIcon: const Icon(Icons.person),
+                label: l10n.creatorManage,
+              ),
+          ],
+        ),
+        body: state.governance != null
+            ? _CreatorGovernanceGate(code: state.governance!)
+            : _tab == 3 && isAdmin
+            ? const _CreatorManagePage()
+            : _tab == 2
+            ? CreatorReviewListPage(
+                embedded: true,
+                initialFilter: widget.initialReviewFilter,
+              )
+            : _tab == 0
+            ? _CreatorOverviewPage(
+                state: state,
+                bandBbs: bandBbs,
+                onRefresh: () => _refresh(controller),
                 onAuthorizeBandBbs: () => _authorizeBandBbs(controller),
                 onConnectGitHub: () => _authorizeGitHub(controller),
-              ),
-              child: CreatorResourceList(
-                state: state,
-                controller: controller,
-                collections: state.collections,
-                collectionsLoading: false,
-                onRefresh: () => _refresh(controller),
-                onOpenCollection: (item) => context.push(
-                  '/resources/creator/collection/${item['id']}',
-                  extra: item,
+                bandBbsBusy: _authorizingBandBbs,
+                githubBusy: _authorizingGitHub,
+                onOpenReviews: (filter) => _switchTab(2, reviewFilter: filter),
+                onOpenResources: () => _switchTab(1),
+              )
+            : _CreatorTermsGate(
+                loading: state.loading,
+                onCreate: () => _openCreateWizard(context, controller),
+                selectionActive: _selectedResourceIds.isNotEmpty,
+                onMoveSelection: () => _moveSelection(state, controller),
+                floatingAccess: null,
+                child: CreatorResourceList(
+                  state: state,
+                  controller: controller,
+                  collections: state.collections,
+                  collectionsLoading: false,
+                  onRefresh: () => _refresh(controller),
+                  onOpenCollection: (item) => context.push(
+                    '/resources/creator/collection/${item['id']}',
+                    extra: item,
+                  ),
+                  onOpen: (workspace) {
+                    controller.select(workspace);
+                    context.push(
+                      '/resources/creator/resources/${workspace.resource.id}',
+                    );
+                  },
+                  selectedResourceIds: _selectedResourceIds,
+                  onSelectionChanged: (value) =>
+                      setState(() => _selectedResourceIds = value),
+                  onDissolveCollection: (item) =>
+                      _dissolveCollection(item, controller),
+                  bottomPadding: 96,
                 ),
-                onOpen: (workspace) {
-                  controller.select(workspace);
-                  context.push('/resources/creator/resource');
-                },
-                selectedResourceIds: _selectedResourceIds,
-                onSelectionChanged: (value) =>
-                    setState(() => _selectedResourceIds = value),
-                onDissolveCollection: (item) =>
-                    _dissolveCollection(item, controller),
-                bottomPadding: 220,
               ),
-            ),
+      ),
     );
   }
 
@@ -111,9 +224,14 @@ class _CreatorCenterPageState extends ConsumerState<CreatorCenterPage> {
     if (_authorizingBandBbs) return;
     setState(() => _authorizingBandBbs = true);
     try {
-      await ref
-          .read(hostAccountsProvider.notifier)
-          .startBandBbsPublishingAuthorization();
+      final account = ref.read(hostAccountsProvider).bandbbs;
+      if (!account.isSignedIn) {
+        await ref.read(hostAccountsProvider.notifier).startBandBbsLogin();
+      } else {
+        await ref
+            .read(hostAccountsProvider.notifier)
+            .startBandBbsPublishingAuthorization();
+      }
       await controller.refresh();
     } catch (error) {
       if (mounted) showCreatorFailure(context, error);
@@ -247,81 +365,187 @@ class _CreatorCenterPageState extends ConsumerState<CreatorCenterPage> {
     BuildContext context,
     CreatorWorkspaceController controller,
   ) async {
-    await context.push('/resources/creator/create');
+    await context.push('/resources/creator/resources/create');
     if (context.mounted) await _refresh(controller);
   }
 }
 
-class _PublishingAccessCard extends StatelessWidget {
-  const _PublishingAccessCard({
-    required this.grants,
-    required this.bandBbsBusy,
-    required this.githubBusy,
-    required this.onAuthorizeBandBbs,
-    required this.onConnectGitHub,
-  });
-
-  final Map<String, Object?> grants;
-  final bool bandBbsBusy;
-  final bool githubBusy;
-  final VoidCallback onAuthorizeBandBbs;
-  final VoidCallback onConnectGitHub;
+class _CreatorManagePage extends StatelessWidget {
+  const _CreatorManagePage();
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final bandBbsReady = grants['bandbbs_publish'] == true;
-    final githubLogin = grants['github_login']?.toString() ?? '';
-    return Card(
-      margin: EdgeInsets.zero,
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          ListTile(
-            leading: const CreatorBrandLogo(
-              asset: 'assets/images/brands/bandbbs.svg',
-              label: 'BandBBS',
-            ),
-            title: Text(
-              'BandBBS',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            subtitle: Text(
-              bandBbsReady
-                  ? l10n.creatorBandBbsWriteReady
-                  : l10n.creatorBandBbsWriteMissing,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            onTap: bandBbsReady || bandBbsBusy ? null : onAuthorizeBandBbs,
+    return Center(child: Text(l10n.creatorManageUnavailable));
+  }
+}
+
+class _CreatorOverviewPage extends StatelessWidget {
+  const _CreatorOverviewPage({
+    required this.state,
+    required this.bandBbs,
+    required this.onRefresh,
+    required this.onAuthorizeBandBbs,
+    required this.onConnectGitHub,
+    required this.bandBbsBusy,
+    required this.githubBusy,
+    required this.onOpenReviews,
+    required this.onOpenResources,
+  });
+
+  final CreatorWorkspaceState state;
+  final HostAccount bandBbs;
+  final Future<void> Function() onRefresh;
+  final VoidCallback onAuthorizeBandBbs;
+  final VoidCallback onConnectGitHub;
+  final bool bandBbsBusy;
+  final bool githubBusy;
+  final ValueChanged<String?> onOpenReviews;
+  final VoidCallback onOpenResources;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final github = state.grants['github_login']?.toString() ?? '';
+    final states = <String, int>{};
+    for (final workspace in state.resources) {
+      final value = creatorWorkspaceState(workspace);
+      states[value] = (states[value] ?? 0) + 1;
+    }
+    final needsChanges = state.resources.where((item) {
+      final review = item.review?['state']?.toString();
+      return review == 'needs_changes' || review == 'changes_requested';
+    }).length;
+    final waiting = state.resources.where((item) {
+      final review = item.review?['state']?.toString();
+      return review == 'pending' ||
+          review == 'reviewing' ||
+          review == 'fixed_pending_review';
+    }).length;
+    final failed = states['failed'] ?? 0;
+    final accountTiles = <AbstractSegmentedTile>[
+      SegmentedTile.navigation(
+        leading: const CreatorBrandLogo(
+          asset: 'assets/images/brands/github.svg',
+          label: 'GitHub',
+        ),
+        title: const Text('GitHub'),
+        description: Text(github.isEmpty ? l10n.creatorNotConnected : github),
+        value: githubBusy
+            ? const SizedBox.square(
+                dimension: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Text(
+                github.isEmpty
+                    ? l10n.creatorNotConnected
+                    : l10n.creatorConnected,
+              ),
+        onPressed: githubBusy ? null : (_) => onConnectGitHub(),
+        enabled: !githubBusy,
+      ),
+      SegmentedTile.navigation(
+        leading: const CreatorBrandLogo(
+          asset: 'assets/images/brands/bandbbs.svg',
+          label: 'BandBBS',
+        ),
+        title: Text(l10n.bandbbs),
+        description: Text(
+          bandBbs.isSignedIn
+              ? (bandBbs.username ?? l10n.creatorConnected)
+              : l10n.creatorNotConnected,
+        ),
+        value: bandBbsBusy
+            ? const SizedBox.square(
+                dimension: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Text(
+                bandBbs.isSignedIn
+                    ? l10n.creatorConnected
+                    : l10n.creatorNotConnected,
+              ),
+        onPressed: bandBbsBusy ? null : (_) => onAuthorizeBandBbs(),
+        enabled: !bandBbsBusy,
+      ),
+    ];
+    final pendingTiles = <AbstractSegmentedTile>[
+      if (needsChanges > 0)
+        _countTile(
+          icon: Icons.edit_outlined,
+          label: l10n.creatorNeedsChanges,
+          count: needsChanges,
+          onTap: () => onOpenReviews('needs_changes'),
+        ),
+      if (waiting > 0)
+        _countTile(
+          icon: Icons.hourglass_empty,
+          label: l10n.pendingReview,
+          count: waiting,
+          onTap: () => onOpenReviews('pending'),
+        ),
+      if (failed > 0)
+        _countTile(
+          icon: Icons.error_outline,
+          label: l10n.creatorStateFailed,
+          count: failed,
+          onTap: onOpenResources,
+        ),
+    ];
+    final statusTiles = <AbstractSegmentedTile>[
+      for (final status in const [
+        'draft',
+        'pending',
+        'approved',
+        'rejected',
+        'failed',
+        'published',
+      ])
+        if ((states[status] ?? 0) > 0)
+          _countTile(
+            label: creatorStateLabel(l10n, status),
+            count: states[status] ?? 0,
+            onTap: onOpenResources,
           ),
-          ListTile(
-            leading: const CreatorBrandLogo(
-              asset: 'assets/images/brands/github.svg',
-              label: 'GitHub',
-            ),
-            title: Text(
-              'GitHub',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            subtitle: Text(
-              githubLogin.isEmpty
-                  ? l10n.creatorGitHubOwnPublishMissing
-                  : l10n.creatorGitHubOwnPublishReady,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            onTap: githubLogin.isNotEmpty || githubBusy
-                ? null
-                : onConnectGitHub,
+    ];
+    return RefreshIndicator(
+      onRefresh: onRefresh,
+      child: SegmentedList(
+        maxWidth: StyleConstants.pageMaxWidth,
+        physics: const AlwaysScrollableScrollPhysics(),
+        contentPadding: const EdgeInsets.only(top: 8, bottom: 32),
+        sections: [
+          SegmentedSection(
+            title: Text(l10n.creatorAccounts),
+            tiles: accountTiles,
           ),
+          if (pendingTiles.isNotEmpty)
+            SegmentedSection(
+              title: Text(l10n.creatorPendingItems),
+              tiles: pendingTiles,
+            ),
+          if (statusTiles.isNotEmpty)
+            SegmentedSection(
+              title: Text(l10n.creatorResourceStatus),
+              tiles: statusTiles,
+            ),
         ],
       ),
     );
   }
+
+  AbstractSegmentedTile _countTile({
+    IconData? icon,
+    required String label,
+    required int count,
+    required VoidCallback onTap,
+  }) => SegmentedTile.navigation(
+    leading: icon == null ? null : Icon(icon),
+    title: Text(label),
+    value: Text('$count'),
+    enabled: count > 0,
+    onPressed: count > 0 ? (_) => onTap() : null,
+  );
 }
 
 class _CreatorGovernanceGate extends StatelessWidget {
@@ -360,70 +584,9 @@ class _CreatorGovernanceGate extends StatelessWidget {
                   banned
                       ? l10n.creatorBannedDescription
                       : l10n.creatorFrozenDescription,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
+                  style: Theme.of(context).textTheme.bodyLarge
+                      ?.copyWith(color: colors.onSurfaceVariant),
                   textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CreatorLoginGate extends StatelessWidget {
-  const _CreatorLoginGate({required this.busy, required this.onLogin});
-
-  final bool busy;
-  final Future<void> Function() onLogin;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final colors = Theme.of(context).colorScheme;
-    return Center(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 520),
-        child: Card(
-          color: colors.surfaceContainerHigh,
-          margin: const EdgeInsets.all(24),
-          child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.account_circle_outlined,
-                  size: 56,
-                  color: colors.primary,
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  l10n.creatorLoginRequiredTitle,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  l10n.creatorLoginRequiredDescription,
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: busy ? null : onLogin,
-                  icon: busy
-                      ? const SizedBox.square(
-                          dimension: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.login),
-                  label: Text(l10n.creatorLoginAction),
                 ),
               ],
             ),
@@ -449,7 +612,7 @@ class _CreatorTermsGate extends ConsumerStatefulWidget {
   final VoidCallback onCreate;
   final bool selectionActive;
   final VoidCallback onMoveSelection;
-  final Widget floatingAccess;
+  final Widget? floatingAccess;
 
   @override
   ConsumerState<_CreatorTermsGate> createState() => _CreatorTermsGateState();
@@ -495,18 +658,19 @@ class _CreatorTermsGateState extends ConsumerState<_CreatorTermsGate> {
       return Stack(
         children: [
           widget.child,
-          Positioned(
-            left: 16,
-            right: 196,
-            bottom: 16,
-            child: Align(
-              alignment: AlignmentDirectional.bottomStart,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 360),
-                child: widget.floatingAccess,
+          if (widget.floatingAccess != null)
+            Positioned(
+              left: 16,
+              right: 196,
+              bottom: 16,
+              child: Align(
+                alignment: AlignmentDirectional.bottomStart,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 360),
+                  child: widget.floatingAccess,
+                ),
               ),
             ),
-          ),
           Positioned(
             right: 16,
             bottom: 16,
@@ -580,7 +744,7 @@ class _CreatorTermsGateState extends ConsumerState<_CreatorTermsGate> {
                                   20,
                                   16,
                                 ),
-                                styleSheet: MarkdownStyleSheet.fromTheme(theme)
+                                styleSheet: markdownStyleSheetFromTheme(theme)
                                     .copyWith(
                                       p: theme.textTheme.bodyMedium?.copyWith(
                                         height: 1.5,

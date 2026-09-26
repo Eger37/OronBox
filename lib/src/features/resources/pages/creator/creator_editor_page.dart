@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -24,6 +24,7 @@ import 'package:oronbox/src/features/resources/pages/creator/creator_shared.dart
 import 'package:oronbox/src/features/resources/services/resource_install_service.dart';
 import 'package:oronbox/src/features/resources/services/resource_image_processor.dart';
 import 'package:oronbox/src/features/resources/services/resource_payload_analyzer.dart';
+import 'package:oronbox/src/features/resources/services/watchface_payload_repair.dart';
 
 class CreatorEditorView extends StatefulWidget {
   const CreatorEditorView({
@@ -72,7 +73,33 @@ List<String> _publicationLinkUrls(Map<String, Object?> publication) {
   return urls;
 }
 
+// velajs' starter project uses this identifier.  It is not a publisher-owned
+// package name and AstroBox uses package IDs as global resource identities.
+const _velajsDefaultPackageId = 'com.application.watch.demo';
+
+String? _invalidPackageIdReason(
+  String? packageId, {
+  required bool isWatchface,
+  required AppLocalizations l10n,
+}) {
+  final value = packageId?.trim() ?? '';
+  if (value.isEmpty) {
+    return isWatchface
+        ? l10n.creatorWatchfaceMissingId
+        : l10n.creatorQuickAppMissingPackage;
+  }
+  if (value == _velajsDefaultPackageId) {
+    return l10n.creatorVelajsDefaultPackage;
+  }
+  return null;
+}
+
+bool _isValidWatchfaceIdOverride(String value) =>
+    RegExp(r'^[0-9]{1,12}$').hasMatch(value.trim()) &&
+    !RegExp(r'^[0]+$').hasMatch(value.trim());
+
 class _CreatorEditorViewState extends State<CreatorEditorView> {
+  int _editorStage = 0;
   late final TextEditingController _name = TextEditingController(
     text:
         widget.workspace.latestRevision?.name ??
@@ -336,6 +363,16 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
     }
   }
 
+  Widget _stageChip(AppLocalizations l10n, String label, int stage) => Padding(
+    padding: const EdgeInsets.only(right: 8),
+    child: FilterChip(
+      label: Text(label),
+      selected: _editorStage == stage,
+      showCheckmark: false,
+      onSelected: (_) => setState(() => _editorStage = stage),
+    ),
+  );
+
   @override
   void dispose() {
     _name.dispose();
@@ -388,423 +425,401 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
                   children: [
-                    if (widget.state.error != null) ...[
-                      MaterialBanner(
-                        content: Text(
-                          localizedErrorMessage(l10n, widget.state.error!),
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: widget.controller.refresh,
-                            child: Text(l10n.refresh),
-                          ),
+                    Center(
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
+                        children: [
+                          _stageChip(l10n, l10n.creatorStageInfo, 0),
+                          _stageChip(l10n, l10n.creatorStageFiles, 1),
+                          _stageChip(l10n, l10n.creatorStagePublish, 2),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                    ],
-                    if (workspace.resource.moderationState != 'visible') ...[
-                      CreatorModerationNotice(resource: workspace.resource),
-                      const SizedBox(height: 12),
-                    ],
-                    if (workspace.review case final review?) ...[
-                      CreatorReviewFeedback(review: review),
-                      const SizedBox(height: 16),
-                    ],
-                    if (workspace.bindings.any((binding) {
-                      final meta = binding['meta'];
-                      return meta is Map &&
-                          meta['imported']?.toString() == 'true';
-                    })) ...[
-                      Card(
-                        color: colors.secondaryContainer,
-                        margin: EdgeInsets.zero,
-                        child: ListTile(
-                          leading: const Icon(Icons.fact_check_outlined),
-                          title: Text(l10n.creatorImportReviewNotice),
-                        ),
+                    ),
+                    const SizedBox(height: 8),
+                    if (_editorStage == 2) ...[
+                      CreatorSectionTitle(
+                        icon: Icons.edit_outlined,
+                        title: l10n.creatorReviewStatus,
                       ),
-                      const SizedBox(height: 16),
-                    ],
-                    if (workspace.publications.isNotEmpty) ...[
-                      Card(
-                        color: colors.surfaceContainerHigh,
-                        margin: EdgeInsets.zero,
-                        child: Column(
-                          children: [
-                            for (final publication in workspace.publications)
-                              ListTile(
-                                dense: true,
-                                leading: _publicationLogo(
-                                  publication['target']?.toString() ?? '',
-                                ),
-                                title: Text(
-                                  creatorTargetLabel(
-                                    l10n,
-                                    publication['target']?.toString() ?? '',
-                                  ),
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    if (publication['error_message']
-                                            ?.toString()
-                                            .isNotEmpty ==
-                                        true)
-                                      Text(
-                                        publication['error_message'].toString(),
-                                      ),
-                                    for (final url in _publicationLinkUrls(
-                                      publication,
-                                    ))
-                                      InkWell(
-                                        onTap: () => launchUrl(Uri.parse(url)),
-                                        child: Text(
-                                          url,
-                                          style: TextStyle(
-                                            color: colors.primary,
-                                            decoration:
-                                                TextDecoration.underline,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    if (publication['target'] == 'oronbox' &&
-                                        publication['state'] == 'published')
-                                      InkWell(
-                                        onTap: () => context.push(
-                                          '/resources/detail/${workspace.resource.id}?source=oronbox',
-                                        ),
-                                        child: Text(
-                                          l10n.creatorOpenInOronBox,
-                                          style: TextStyle(
-                                            color: colors.primary,
-                                            decoration:
-                                                TextDecoration.underline,
-                                            decorationColor: colors.primary,
-                                          ),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                                trailing: CreatorStateBadge(
-                                  state: publication['state']?.toString() ?? '',
-                                ),
-                              ),
+                      const SizedBox(height: 8),
+                      if (widget.state.error != null) ...[
+                        MaterialBanner(
+                          content: Text(
+                            localizedErrorMessage(l10n, widget.state.error!),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: widget.controller.refresh,
+                              child: Text(l10n.refresh),
+                            ),
                           ],
                         ),
-                      ),
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 12),
+                      ],
+                      if (workspace.resource.moderationState != 'visible') ...[
+                        CreatorModerationNotice(resource: workspace.resource),
+                        const SizedBox(height: 12),
+                      ],
+                      if (workspace.review case final review?) ...[
+                        CreatorReviewFeedback(review: review),
+                        const SizedBox(height: 16),
+                      ],
+                      if (workspace.bindings.any((binding) {
+                        final meta = binding['meta'];
+                        return meta is Map &&
+                            meta['imported']?.toString() == 'true';
+                      })) ...[
+                        Card(
+                          color: colors.secondaryContainer,
+                          margin: EdgeInsets.zero,
+                          child: ListTile(
+                            leading: const Icon(Icons.fact_check_outlined),
+                            title: Text(l10n.creatorImportReviewNotice),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                     ],
-                    CreatorSectionTitle(
-                      icon: Icons.description_outlined,
-                      title: l10n.basicInfo,
-                    ),
-                    const SizedBox(height: 8),
-                    CreatorEditorCard(
-                      padding: const EdgeInsets.all(14),
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: _name,
-                            onChanged: (_) => setState(() {}),
-                            decoration: InputDecoration(
-                              labelText: l10n.creatorResourceName,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          TextField(
-                            controller: _summary,
-                            minLines: 3,
-                            maxLines: 8,
-                            onChanged: (_) => setState(() {}),
-                            decoration: InputDecoration(
-                              labelText: l10n.creatorResourceSummary,
-                            ),
-                          ),
-                          if (_name.text.trim().isEmpty ||
-                              _summary.text.trim().isEmpty)
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 6),
-                                child: Text(
-                                  l10n.creatorResourceMetadataRequired,
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.error,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          const SizedBox(height: 12),
-                          DropdownButtonFormField<CommunityPaidType>(
-                            initialValue: _paidType,
-                            decoration: InputDecoration(
-                              labelText: l10n.creatorPaidType,
-                            ),
-                            items: [
-                              DropdownMenuItem(
-                                value: CommunityPaidType.free,
-                                child: Text(l10n.free),
-                              ),
-                              DropdownMenuItem(
-                                value: CommunityPaidType.paid,
-                                child: Text(l10n.paid),
-                              ),
-                              DropdownMenuItem(
-                                value: CommunityPaidType.forcePaid,
-                                child: Text(l10n.forcePaid),
-                              ),
-                            ],
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() {
-                                  _paidType = value;
-                                  if (value == CommunityPaidType.free) {
-                                    _externalPurchaseEnabled = false;
-                                  }
-                                });
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              l10n.creatorContentAttributes,
-                              style: Theme.of(context).textTheme.titleSmall,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: _loadingAttributes
-                                ? const SizedBox.square(
-                                    dimension: 22,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: [
-                                      for (final attribute
-                                          in _attributeDefinitions)
-                                        FilterChip(
-                                          label: Text(
-                                            attribute.labelFor(
-                                              Localizations.localeOf(context),
-                                            ),
-                                          ),
-                                          selected: _attributes.contains(
-                                            attribute.id,
-                                          ),
-                                          onSelected: (selected) => setState(
-                                            () => selected
-                                                ? _attributes.add(attribute.id)
-                                                : _attributes.remove(
-                                                    attribute.id,
-                                                  ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                          ),
-                        ],
+                    if (_editorStage == 0) ...[
+                      CreatorSectionTitle(
+                        icon: Icons.description_outlined,
+                        title: l10n.basicInfo,
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    CreatorSectionTitle(
-                      icon: Icons.link_outlined,
-                      title: l10n.creatorAdditionalLinks,
-                    ),
-                    const SizedBox(height: 8),
-                    for (var index = 0; index < _links.length; index++) ...[
+                      const SizedBox(height: 8),
                       CreatorEditorCard(
                         padding: const EdgeInsets.all(14),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Column(
                           children: [
-                            Expanded(
-                              child: Column(
-                                children: [
-                                  TextField(
-                                    controller: _links[index].title,
-                                    decoration: InputDecoration(
-                                      labelText: l10n.creatorLinkTitle,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 12),
-                                  TextField(
-                                    controller: _links[index].url,
-                                    keyboardType: TextInputType.url,
-                                    decoration: InputDecoration(
-                                      labelText: l10n.creatorLinkUrl,
-                                    ),
-                                  ),
-                                ],
+                            TextField(
+                              controller: _name,
+                              onChanged: (_) => setState(() {}),
+                              decoration: InputDecoration(
+                                labelText: l10n.creatorResourceName,
                               ),
                             ),
-                            IconButton(
-                              tooltip: l10n.delete,
-                              onPressed: () => setState(() {
-                                _links.removeAt(index).dispose();
-                              }),
-                              icon: const Icon(Icons.delete_outline),
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: _summary,
+                              minLines: 3,
+                              maxLines: 8,
+                              onChanged: (_) => setState(() {}),
+                              decoration: InputDecoration(
+                                labelText: l10n.creatorResourceSummary,
+                              ),
+                            ),
+                            if (_name.text.trim().isEmpty ||
+                                _summary.text.trim().isEmpty)
+                              Align(
+                                alignment: Alignment.centerLeft,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Text(
+                                    l10n.creatorResourceMetadataRequired,
+                                    style: TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .error,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(height: 12),
+                            DropdownButtonFormField<CommunityPaidType>(
+                              initialValue: _paidType,
+                              decoration: InputDecoration(
+                                labelText: l10n.creatorPaidType,
+                              ),
+                              items: [
+                                DropdownMenuItem(
+                                  value: CommunityPaidType.free,
+                                  child: Text(l10n.free),
+                                ),
+                                DropdownMenuItem(
+                                  value: CommunityPaidType.paid,
+                                  child: Text(l10n.paid),
+                                ),
+                                DropdownMenuItem(
+                                  value: CommunityPaidType.forcePaid,
+                                  child: Text(l10n.forcePaid),
+                                ),
+                              ],
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() {
+                                    _paidType = value;
+                                    if (value == CommunityPaidType.free) {
+                                      _externalPurchaseEnabled = false;
+                                    }
+                                  });
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                l10n.creatorContentAttributes,
+                                style: Theme.of(context).textTheme.titleSmall,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: _loadingAttributes
+                                  ? const SizedBox.square(
+                                      dimension: 22,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Wrap(
+                                      spacing: 8,
+                                      runSpacing: 8,
+                                      children: [
+                                        for (final attribute
+                                            in _attributeDefinitions)
+                                          FilterChip(
+                                            label: Text(
+                                              attribute.labelFor(
+                                                Localizations.localeOf(context),
+                                              ),
+                                            ),
+                                            selected: _attributes.contains(
+                                              attribute.id,
+                                            ),
+                                            onSelected: (selected) => setState(
+                                              () => selected
+                                                  ? _attributes.add(
+                                                      attribute.id,
+                                                    )
+                                                  : _attributes.remove(
+                                                      attribute.id,
+                                                    ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 12),
-                    ],
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: FilledButton.tonalIcon(
-                        onPressed: _links.length >= 16
-                            ? null
-                            : () => setState(() => _links.add(_DraftLink())),
-                        icon: const Icon(Icons.add_link),
-                        label: Text(l10n.creatorAddLink),
+                      const SizedBox(height: 20),
+                      CreatorSectionTitle(
+                        icon: Icons.link_outlined,
+                        title: l10n.creatorAdditionalLinks,
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                    CreatorSectionTitle(
-                      icon: Icons.collections_outlined,
-                      title: l10n.creatorIconCover,
-                    ),
-                    const SizedBox(height: 8),
-                    Builder(
-                      builder: (context) {
-                        const iconWidth = 208.0;
-                        const previewHeight = iconWidth - 24;
-                        const coverWidth = previewHeight * 1.5 + 24;
-                        return Wrap(
+                      const SizedBox(height: 8),
+                      for (var index = 0; index < _links.length; index++) ...[
+                        CreatorEditorCard(
+                          padding: const EdgeInsets.all(14),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    TextField(
+                                      controller: _links[index].title,
+                                      decoration: InputDecoration(
+                                        labelText: l10n.creatorLinkTitle,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    TextField(
+                                      controller: _links[index].url,
+                                      keyboardType: TextInputType.url,
+                                      decoration: InputDecoration(
+                                        labelText: l10n.creatorLinkUrl,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              IconButton(
+                                tooltip: l10n.delete,
+                                onPressed: () => setState(() {
+                                  _links.removeAt(index).dispose();
+                                }),
+                                icon: const Icon(Icons.delete_outline),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: FilledButton.tonalIcon(
+                          onPressed: _links.length >= 16
+                              ? null
+                              : () => setState(() => _links.add(_DraftLink())),
+                          icon: const Icon(Icons.add_link),
+                          label: Text(l10n.creatorAddLink),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      CreatorSectionTitle(
+                        icon: Icons.collections_outlined,
+                        title: l10n.creatorIconCover,
+                      ),
+                      const SizedBox(height: 8),
+                      Builder(
+                        builder: (context) {
+                          const iconWidth = 208.0;
+                          const previewHeight = iconWidth - 24;
+                          const coverWidth = previewHeight * 1.5 + 24;
+                          return Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            children: [
+                              SizedBox(
+                                width: iconWidth,
+                                child: _mediaRoleCard(
+                                  l10n,
+                                  'icon',
+                                  previewHeight: previewHeight,
+                                ),
+                              ),
+                              SizedBox(
+                                width: coverWidth,
+                                child: _mediaRoleCard(
+                                  l10n,
+                                  'cover',
+                                  previewHeight: previewHeight,
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 20),
+                      CreatorSectionTitle(
+                        icon: Icons.photo_library_outlined,
+                        title: l10n.previewImages,
+                      ),
+                      const SizedBox(height: 8),
+                      if (_previews.isNotEmpty || _addingPreview)
+                        Wrap(
                           spacing: 12,
                           runSpacing: 12,
                           children: [
-                            SizedBox(
-                              width: iconWidth,
-                              child: _mediaRoleCard(
-                                l10n,
-                                'icon',
-                                previewHeight: previewHeight,
-                              ),
-                            ),
-                            SizedBox(
-                              width: coverWidth,
-                              child: _mediaRoleCard(
-                                l10n,
-                                'cover',
-                                previewHeight: previewHeight,
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    CreatorSectionTitle(
-                      icon: Icons.photo_library_outlined,
-                      title: l10n.previewImages,
-                    ),
-                    const SizedBox(height: 8),
-                    if (_previews.isNotEmpty || _addingPreview)
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          for (var index = 0; index < _previews.length; index++)
-                            _previewCard(l10n, index),
-                          if (_addingPreview) _processingPreviewCard(),
-                        ],
-                      ),
-                    const SizedBox(height: 12),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: FilledButton.tonalIcon(
-                        onPressed: widget.state.loading || _addingPreview
-                            ? null
-                            : _pickPreview,
-                        icon: const Icon(Icons.add_photo_alternate_outlined),
-                        label: Text(l10n.add),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    CreatorSectionTitle(
-                      icon: Icons.folder_zip_outlined,
-                      title: l10n.packageFiles,
-                    ),
-                    const SizedBox(height: 8),
-                    for (var index = 0; index < _artifacts.length; index++) ...[
-                      _artifactCard(l10n, index),
-                      const SizedBox(height: 12),
-                    ],
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: FilledButton.tonalIcon(
-                        onPressed: widget.state.loading ? null : _pickArtifact,
-                        icon: const Icon(Icons.upload_file_outlined),
-                        label: Text(l10n.creatorAddArtifact),
-                      ),
-                    ),
-                    if (_paidType != CommunityPaidType.free) ...[
-                      const SizedBox(height: 16),
-                      CreatorEditorCard(
-                        padding: const EdgeInsets.all(14),
-                        child: Column(
-                          children: [
-                            CheckboxListTile(
-                              value: _externalPurchaseEnabled,
-                              onChanged: widget.state.loading
-                                  ? null
-                                  : (value) => setState(
-                                      () => _externalPurchaseEnabled =
-                                          value == true,
-                                    ),
-                              contentPadding: EdgeInsets.zero,
-                              controlAffinity: ListTileControlAffinity.leading,
-                              title: Text(
-                                l10n.creatorFullVersionExternalPurchase,
-                              ),
-                              subtitle: Text(
-                                l10n.creatorExternalPurchaseDescription,
-                              ),
-                            ),
-                            if (_externalPurchaseEnabled) ...[
-                              const SizedBox(height: 8),
-                              TextField(
-                                controller: _externalPurchaseLink,
-                                keyboardType: TextInputType.url,
-                                onChanged: (_) => setState(() {}),
-                                decoration: InputDecoration(
-                                  labelText: l10n.creatorExternalPurchaseLink,
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              TextField(
-                                controller: _externalPurchaseAmount,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                      decimal: true,
-                                    ),
-                                onChanged: (_) => setState(() {}),
-                                decoration: InputDecoration(
-                                  labelText: l10n.creatorExternalPurchaseAmount,
-                                ),
-                              ),
-                            ],
+                            for (
+                              var index = 0;
+                              index < _previews.length;
+                              index++
+                            )
+                              _previewCard(l10n, index),
+                            if (_addingPreview) _processingPreviewCard(),
                           ],
                         ),
+                      const SizedBox(height: 12),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: FilledButton.tonalIcon(
+                          onPressed: widget.state.loading || _addingPreview
+                              ? null
+                              : _pickPreview,
+                          icon: const Icon(Icons.add_photo_alternate_outlined),
+                          label: Text(l10n.add),
+                        ),
                       ),
+                      const SizedBox(height: 20),
                     ],
-                    const SizedBox(height: 20),
-                    CreatorSectionTitle(
-                      icon: Icons.publish_outlined,
-                      title: l10n.publishTargets,
-                    ),
-                    const SizedBox(height: 8),
-                    _publicationEditor(l10n),
+                    if (_editorStage == 1) ...[
+                      CreatorSectionTitle(
+                        icon: Icons.folder_zip_outlined,
+                        title: l10n.packageFiles,
+                      ),
+                      const SizedBox(height: 8),
+                      for (
+                        var index = 0;
+                        index < _artifacts.length;
+                        index++
+                      ) ...[
+                        _artifactCard(l10n, index),
+                        const SizedBox(height: 12),
+                      ],
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: FilledButton.tonalIcon(
+                          onPressed: widget.state.loading
+                              ? null
+                              : _pickArtifact,
+                          icon: const Icon(Icons.upload_file_outlined),
+                          label: Text(l10n.creatorAddArtifact),
+                        ),
+                      ),
+                      if (_paidType != CommunityPaidType.free) ...[
+                        const SizedBox(height: 16),
+                        CreatorEditorCard(
+                          padding: const EdgeInsets.all(14),
+                          child: Column(
+                            children: [
+                              CheckboxListTile(
+                                value: _externalPurchaseEnabled,
+                                onChanged: widget.state.loading
+                                    ? null
+                                    : (value) => setState(
+                                        () => _externalPurchaseEnabled =
+                                            value == true,
+                                      ),
+                                contentPadding: EdgeInsets.zero,
+                                controlAffinity:
+                                    ListTileControlAffinity.leading,
+                                title: Text(
+                                  l10n.creatorFullVersionExternalPurchase,
+                                ),
+                                subtitle: Text(
+                                  l10n.creatorExternalPurchaseDescription,
+                                ),
+                              ),
+                              if (_externalPurchaseEnabled) ...[
+                                const SizedBox(height: 8),
+                                TextField(
+                                  controller: _externalPurchaseLink,
+                                  keyboardType: TextInputType.url,
+                                  onChanged: (_) => setState(() {}),
+                                  decoration: InputDecoration(
+                                    labelText: l10n.creatorExternalPurchaseLink,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                TextField(
+                                  controller: _externalPurchaseAmount,
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(
+                                        decimal: true,
+                                      ),
+                                  onChanged: (_) => setState(() {}),
+                                  decoration: InputDecoration(
+                                    labelText:
+                                        l10n.creatorExternalPurchaseAmount,
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 20),
+                    ],
+                    if (_editorStage == 2) ...[
+                      if (workspace.publications.isNotEmpty) ...[
+                        CreatorSectionTitle(
+                          icon: Icons.assignment_turned_in_outlined,
+                          title: l10n.creatorPublicationStatus,
+                        ),
+                        const SizedBox(height: 8),
+                        _publicationStatusSection(l10n),
+                        const SizedBox(height: 16),
+                      ],
+                      CreatorSectionTitle(
+                        icon: Icons.publish_outlined,
+                        title: l10n.publishTargets,
+                      ),
+                      const SizedBox(height: 8),
+                      _publicationEditor(l10n),
+                    ],
                   ],
                 ),
               ),
@@ -871,26 +886,53 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
                   ),
                 ),
               ),
-            FilledButton.icon(
-              onPressed:
-                  widget.state.loading || widget.workspace.resource.isFrozen
-                  ? null
-                  : _publish,
-              icon: Icon(
-                widget.state.loading
-                    ? Icons.hourglass_top_rounded
-                    : Icons.send_outlined,
-              ),
-              label: Text(
-                widget.state.loading
-                    ? creatorOperationLabel(l10n, widget.state.operation)
-                    : l10n.creatorSubmitReview,
-              ),
-            ),
+            _primaryActionButton(l10n),
           ],
         ),
       ],
     );
+  }
+
+  Widget _submitButtonChild(AppLocalizations l10n) {
+    if (!widget.state.loading) {
+      return Text(
+        _editorStage == 2 ? l10n.creatorSubmitReview : l10n.creatorNextStep,
+      );
+    }
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const SizedBox.square(
+          dimension: 18,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+        const SizedBox(width: 8),
+        Text(creatorOperationLabel(l10n, widget.state.operation)),
+      ],
+    );
+  }
+
+  Widget _primaryActionButton(AppLocalizations l10n) {
+    final onPressed = widget.state.loading || widget.workspace.resource.isFrozen
+        ? null
+        : (_editorStage == 2 ? _publish : () => setState(() => _editorStage++));
+    if (_editorStage == 2) {
+      return FilledButton.icon(
+        onPressed: onPressed,
+        icon: widget.state.loading
+            ? const SizedBox.square(
+                dimension: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(Icons.send_outlined),
+        label: Text(
+          widget.state.loading
+              ? creatorOperationLabel(l10n, widget.state.operation)
+              : l10n.creatorSubmitReview,
+        ),
+      );
+    }
+    return FilledButton(onPressed: onPressed, child: _submitButtonChild(l10n));
   }
 
   CreatorExternalPurchaseIssue? _externalPurchaseIssue({
@@ -1016,7 +1058,7 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
     final l10n = AppLocalizations.of(context)!;
     final file = await _pickFile();
     if (file == null || !mounted) return;
-    final analysis = widget.ref
+    var analysis = widget.ref
         .read(resourceInstallServiceProvider)
         .analyzePayload(
           fileName: file.name,
@@ -1042,6 +1084,40 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
       );
       return;
     }
+    final identifierIsZero =
+        analysis.identifier?.trim().isNotEmpty == true &&
+        RegExp(r'^0+$').hasMatch(analysis.identifier!.trim());
+    if (isWatchface &&
+        (analysis.identifier == null || identifierIsZero) &&
+        (identifierIsZero || isZeroVelaWatchfaceId(analysis.payload))) {
+      final id = await _promptWatchfaceId(l10n);
+      if (id == null) return;
+      final patched = replaceVelaWatchfaceId(analysis.payload, id);
+      if (patched == null) {
+        _showFailure(l10n.creatorWatchfacePayloadTooShort);
+        return;
+      }
+      analysis = ResourcePayloadAnalysis(
+        type: analysis.type,
+        platform: analysis.platform,
+        packageKind: analysis.packageKind,
+        payload: Uint8List.fromList(patched),
+        evidence: analysis.evidence,
+        name: analysis.name,
+        version: analysis.version,
+        identifier: id,
+        target: analysis.target,
+      );
+    }
+    final packageIssue = _invalidPackageIdReason(
+      analysis.identifier,
+      isWatchface: isWatchface,
+      l10n: l10n,
+    );
+    if (packageIssue != null) {
+      _showFailure(packageIssue);
+      return;
+    }
     final asset = _DraftAsset(
       key: replace?.key ?? 'local-${DateTime.now().microsecondsSinceEpoch}',
       name: file.name,
@@ -1062,6 +1138,47 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
     _autoFillAstroItemId();
     _rebuildPlan();
   });
+
+  Future<String?> _promptWatchfaceId(AppLocalizations l10n) async {
+    final controller = TextEditingController();
+    try {
+      return await showDialog<String>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.creatorWatchfaceZeroIdTitle),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(12),
+            ],
+            decoration: InputDecoration(
+              hintText: l10n.installQueueFixWatchfaceIdHint,
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.cancel),
+            ),
+            ValueListenableBuilder<TextEditingValue>(
+              valueListenable: controller,
+              builder: (context, value, _) => FilledButton(
+                onPressed: _isValidWatchfaceIdOverride(value.text)
+                    ? () => Navigator.pop(context, value.text.trim())
+                    : null,
+                child: Text(l10n.save),
+              ),
+            ),
+          ],
+        ),
+      );
+    } finally {
+      controller.dispose();
+    }
+  }
 
   void _removeArtifact(String key) {
     setState(() {
@@ -1175,45 +1292,39 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
     if (mounted) setState(() => _publicationPlan = plan);
   }
 
+  List<CreatorBandBbsTarget> get _effectiveBandBbsTargets =>
+      _publicationPlan?.bandBbsTargets ?? const <CreatorBandBbsTarget>[];
+
+  Map<String, Object?> _bandBbsConfig() => <String, Object?>{
+    'agreement': true,
+    if (_bandBbsVersionTitle.text.trim().isNotEmpty)
+      'version_title': _bandBbsVersionTitle.text.trim(),
+    if (_bandBbsVersionMessage.text.trim().isNotEmpty)
+      'version_message': _bandBbsVersionMessage.text.trim(),
+    if (_overwritePreviousBandBbs) 'overwrite_previous_version': true,
+    if (_externalPurchaseEnabled)
+      'price': double.tryParse(_externalPurchaseAmount.text.trim()),
+    'targets': [for (final target in _effectiveBandBbsTargets) target.toJson()],
+  };
+
+  Map<String, Object?> _astroBoxConfig() => <String, Object?>{
+    'item_id': _astroItemId.text.trim(),
+    'repo_name': _astroRepository.text.trim(),
+    'tags': _astroTags.text
+        .split(RegExp(r'[,;，；]'))
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty)
+        .toList(),
+    'author': _astroAuthor.text.trim(),
+    if (_paidType != CommunityPaidType.free)
+      'paid_type': communityPaidTypeToWire(_paidType),
+    'bind_ab_account': _astroBindABAccount,
+    'agreement': true,
+  };
+
   List<Map<String, Object?>> _publishPlans() => [
-    if (_publishBandBbs)
-      {
-        'target': 'bandbbs',
-        'config': <String, Object?>{
-          'agreement': true,
-          if (_bandBbsVersionTitle.text.trim().isNotEmpty)
-            'version_title': _bandBbsVersionTitle.text.trim(),
-          if (_bandBbsVersionMessage.text.trim().isNotEmpty)
-            'version_message': _bandBbsVersionMessage.text.trim(),
-          if (_overwritePreviousBandBbs) 'overwrite_previous_version': true,
-          if (_externalPurchaseEnabled)
-            'price': double.tryParse(_externalPurchaseAmount.text.trim()),
-          'targets': [
-            for (final target
-                in _publicationPlan?.bandBbsTargets ??
-                    const <CreatorBandBbsTarget>[])
-              target.toJson(),
-          ],
-        },
-      },
-    if (_publishAstroBox)
-      {
-        'target': 'astrobox',
-        'config': <String, Object?>{
-          'item_id': _astroItemId.text.trim(),
-          'repo_name': _astroRepository.text.trim(),
-          'tags': _astroTags.text
-              .split(RegExp(r'[,;，；]'))
-              .map((value) => value.trim())
-              .where((value) => value.isNotEmpty)
-              .toList(),
-          'author': _astroAuthor.text.trim(),
-          if (_paidType != CommunityPaidType.free)
-            'paid_type': communityPaidTypeToWire(_paidType),
-          'bind_ab_account': _astroBindABAccount,
-          'agreement': true,
-        },
-      },
+    if (_publishBandBbs) {'target': 'bandbbs', 'config': _bandBbsConfig()},
+    if (_publishAstroBox) {'target': 'astrobox', 'config': _astroBoxConfig()},
   ];
 
   Future<void> _publish() async {
@@ -1236,19 +1347,106 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
       _showFailure(purchaseError);
       return;
     }
+    var applyBandBbs = _publishBandBbs;
+    final reviewState = widget.workspace.review?['state']?.toString();
+    final astroReview =
+        widget.workspace.publications.any(
+          (item) => item['target']?.toString() == 'astrobox',
+        ) &&
+        (reviewState == 'rejected' ||
+            reviewState == 'changes_requested' ||
+            reviewState == 'fixed_pending_review');
+    if (astroReview) {
+      var selectedBandBbs = false;
+      final accepted = await showDialog<bool>(
+        context: context,
+        builder: (context) => StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            title: Text(l10n.creatorApplyChanges),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CheckboxListTile(
+                  value: true,
+                  onChanged: null,
+                  title: Text(l10n.creatorGithubPr),
+                ),
+                CheckboxListTile(
+                  value: true,
+                  onChanged: null,
+                  title: Text(l10n.creatorConfirmOronBox),
+                ),
+                CheckboxListTile(
+                  value: selectedBandBbs,
+                  onChanged: (value) =>
+                      setDialogState(() => selectedBandBbs = value ?? false),
+                  title: Text(l10n.bandbbs),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(l10n.cancel),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(l10n.creatorConfirm),
+              ),
+            ],
+          ),
+        ),
+      );
+      if (accepted != true) return;
+      applyBandBbs = selectedBandBbs;
+    }
+    if (!mounted) return;
     final plans = <Map<String, Object?>>[
       {'target': 'oronbox', 'config': <String, Object?>{}},
       ..._publishPlans(),
     ];
+    // Rework with "sync to BandBBS" ticked must send the same complete
+    // configuration as a normal BandBBS publish, not an empty one.
+    if (applyBandBbs && !_publishBandBbs) {
+      plans.add({'target': 'bandbbs', 'config': _bandBbsConfig()});
+    }
+    // The review dialog promises a GitHub PR update; make sure an astrobox
+    // plan actually exists to carry it even when the checkbox was off.
+    if (astroReview && plans.every((plan) => plan['target'] != 'astrobox')) {
+      plans.add({'target': 'astrobox', 'config': _astroBoxConfig()});
+    }
+    if (astroReview) {
+      for (final plan in plans) {
+        if (plan['target'] == 'astrobox') {
+          final config = (plan['config'] as Map<String, Object?>);
+          config['update_existing'] = true;
+          config['review_case_id'] = widget.workspace.review?['id'];
+          config['apply_to_bandbbs'] = applyBandBbs;
+          final publication = widget.workspace.publications
+              .where((item) => item['target']?.toString() == 'astrobox')
+              .firstOrNull;
+          final detail = (publication?['status_detail'] as Map?)
+              ?.cast<String, Object?>();
+          final pullRequestNumber = detail?['pull_request_number'];
+          if (pullRequestNumber is num && pullRequestNumber > 0) {
+            config['pull_request_number'] = pullRequestNumber.toInt();
+          }
+        }
+      }
+    }
+    // Derive the confirmation summary from the plans that will actually be
+    // submitted, so the dialog can never promise (or hide) a target.
+    bool planTargets(String target) =>
+        plans.any((plan) => plan['target'] == target);
     final summary = <String>[
       l10n.creatorConfirmOronBox,
-      if (_publishBandBbs)
+      if (planTargets('bandbbs'))
         l10n.creatorConfirmBandBbs(
-          (_publicationPlan?.bandBbsTargets ?? const <CreatorBandBbsTarget>[])
+          _effectiveBandBbsTargets
               .map((target) => target.categoryName)
               .join(' / '),
         ),
-      if (_publishAstroBox)
+      if (planTargets('astrobox'))
         l10n.creatorConfirmAstroBox(
           widget.state.grants['github_login']?.toString() ?? 'GitHub',
           _astroRepository.text.trim(),
@@ -1301,6 +1499,12 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
     if (_artifacts.isEmpty) issues.add(l10n.creatorAddArtifact);
     if (_previews.isEmpty) issues.add(l10n.previewImages);
     for (final artifact in _artifacts) {
+      final packageIssue = _invalidPackageIdReason(
+        artifact.packageId,
+        isWatchface: artifact.type.contains('watchface'),
+        l10n: l10n,
+      );
+      if (packageIssue != null) issues.add('${artifact.name}: $packageIssue');
       if ((_deviceSelections[artifact.key] ?? const <String>{}).isEmpty) {
         issues.add('${l10n.creatorBindDevices}: ${artifact.name}');
       }
@@ -1339,6 +1543,63 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
       }
     }
     return issues;
+  }
+
+  List<String> _astroBoxUnsupportedDeviceNames() {
+    final selected = <String>{
+      for (final ids in _deviceSelections.values) ...ids,
+    };
+    return [
+      for (final device in widget.state.devices)
+        if (selected.contains(device.id) && device.astroBoxId.trim().isEmpty)
+          device.name,
+    ];
+  }
+
+  Widget _unsupportedDeviceNotice(
+    AppLocalizations l10n,
+    String platform,
+    List<String> names,
+  ) {
+    if (names.isEmpty) return const SizedBox.shrink();
+    final isAstro = platform == 'AstroBox';
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            isAstro ? Icons.filter_alt_outlined : Icons.skip_next_outlined,
+            color: Theme.of(context).colorScheme.tertiary,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isAstro
+                      ? l10n.creatorFilteredSupport
+                      : l10n.creatorSkippedPublication,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.tertiary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                for (final name in names)
+                  Text(
+                    name,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _saveDraft() {
@@ -1586,17 +1847,15 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
           const SizedBox(height: 2),
           Text(
             _assetMeta(asset) ?? ' ',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: colors.onSurfaceVariant),
           ),
           if (shapeHint != null) ...[
             const SizedBox(height: 2),
             Text(
               shapeHint,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: colors.error),
+              style: Theme.of(context).textTheme.bodySmall
+                  ?.copyWith(color: colors.error),
             ),
           ],
           Row(
@@ -1742,9 +2001,8 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
                       _assetMeta(asset) ?? '',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall
+                          ?.copyWith(color: colors.onSurfaceVariant),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -1868,9 +2126,8 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
                     if (meta.isNotEmpty)
                       Text(
                         meta,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: colors.onSurfaceVariant,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: colors.onSurfaceVariant),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -2008,7 +2265,17 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
                         return;
                       }
                       setState(() => _publishBandBbs = value);
-                      if (value) _loadPublicationPlan();
+                      if (value) {
+                        await _loadPublicationPlan();
+                        final unsupported =
+                            _publicationPlan?.unmappedDeviceNames ??
+                            const <String>[];
+                        if (unsupported.isNotEmpty) {
+                          _showFailure(
+                            l10n.creatorBandBbsUnsupportedDevicesNotice,
+                          );
+                        }
+                      }
                     }
                   : null,
             ),
@@ -2087,6 +2354,12 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
                       icon: Icons.info_outline,
                       message: l10n.creatorResolvingPublicationTarget,
                     ),
+                  if (_publicationPlan case final plan?)
+                    _unsupportedDeviceNotice(
+                      l10n,
+                      '米坛社区',
+                      plan.unmappedDeviceNames,
+                    ),
                 ],
               ),
             ),
@@ -2149,10 +2422,21 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
               onChanged: (value) async {
                 if (value && !await _confirmTargetTerms('astrobox')) return;
                 setState(() => _publishAstroBox = value);
+                if (value) {
+                  final unsupported = _astroBoxUnsupportedDeviceNames();
+                  if (unsupported.isNotEmpty && mounted) {
+                    _showFailure(l10n.creatorAstroBoxUnsupportedDevicesNotice);
+                  }
+                }
               },
             ),
           ),
           if (_publishAstroBox) ...[
+            _unsupportedDeviceNotice(
+              l10n,
+              'AstroBox',
+              _astroBoxUnsupportedDeviceNames(),
+            ),
             _publicationDetails(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -2208,6 +2492,70 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _publicationStatusSection(AppLocalizations l10n) {
+    return CreatorEditorCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          for (final publication in widget.workspace.publications)
+            _publicationStatusTile(l10n, publication),
+        ],
+      ),
+    );
+  }
+
+  Widget _publicationStatusTile(
+    AppLocalizations l10n,
+    Map<String, Object?> publication,
+  ) {
+    final colors = Theme.of(context).colorScheme;
+    final target = publication['target']?.toString() ?? '';
+    final links = _publicationLinkUrls(publication);
+    final error = publication['error_message']?.toString().trim() ?? '';
+    final isPublished =
+        target == 'oronbox' && publication['state']?.toString() == 'published';
+    return _publicationTargetRow(
+      leading: _publicationLogo(target),
+      title: Text(creatorTargetLabel(l10n, target)),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (error.isNotEmpty) Text(error),
+          for (final url in links)
+            InkWell(
+              onTap: () => unawaited(launchUrl(Uri.parse(url))),
+              child: Text(
+                url,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: colors.primary,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          if (isPublished)
+            InkWell(
+              onTap: () => context.push(
+                '/resources/detail/${widget.workspace.resource.id}?source=oronbox',
+              ),
+              child: Text(
+                l10n.creatorOpenInOronBox,
+                style: TextStyle(
+                  color: colors.primary,
+                  decoration: TextDecoration.underline,
+                  decorationColor: colors.primary,
+                ),
+              ),
+            ),
+        ],
+      ),
+      trailing: CreatorStateBadge(
+        state: publication['state']?.toString() ?? '',
       ),
     );
   }
@@ -2301,9 +2649,8 @@ class _CreatorEditorViewState extends State<CreatorEditorView> {
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
+                  style: Theme.of(context).textTheme.bodySmall
+                      ?.copyWith(color: colors.onSurfaceVariant),
                 ),
               ],
             ),

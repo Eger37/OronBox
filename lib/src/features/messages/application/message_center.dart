@@ -91,9 +91,10 @@ class UserMessage {
     required this.read,
     required this.targetResourceId,
     required this.targetCommentId,
+    required this.targetReviewId,
   });
   final String id, kind, event, legacyTitle, legacyBody;
-  final String targetResourceId, targetCommentId;
+  final String targetResourceId, targetCommentId, targetReviewId;
   final Map<String, Object?> data;
   final DateTime createdAt;
   final bool read;
@@ -108,6 +109,7 @@ class UserMessage {
     read: read ?? this.read,
     targetResourceId: targetResourceId,
     targetCommentId: targetCommentId,
+    targetReviewId: targetReviewId,
   );
 
   factory UserMessage.fromJson(Map<String, Object?> json) {
@@ -138,6 +140,11 @@ class UserMessage {
           : targetSource == 'comment'
           ? value('target_id')
           : json['target_comment_id']?.toString() ?? '',
+      targetReviewId: value('review_case_id').isNotEmpty
+          ? value('review_case_id')
+          : value('review_id').isNotEmpty
+          ? value('review_id')
+          : json['target_review_id']?.toString() ?? '',
     );
   }
 }

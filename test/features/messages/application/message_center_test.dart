@@ -70,6 +70,18 @@ void main() {
     expect(message.targetResourceId, 'resource-3');
     expect(message.targetCommentId, 'comment-3');
   });
+
+  test('parses review case deep links from message metadata', () {
+    final message = UserMessage.fromJson({
+      'id': 'm4',
+      'kind': 'review_result',
+      'event': 'review.rejected',
+      'data': {'review_case_id': 'review-4'},
+      'created_at': '2026-08-28T10:00:00Z',
+    });
+
+    expect(message.targetReviewId, 'review-4');
+  });
 }
 
 class _MessageHost implements OronBoxCommandBus {

@@ -1,12 +1,15 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:segmented_list/segmented_list.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:oronbox/src/app/generated/app_localizations.dart';
 import 'package:oronbox/src/app/utils/error_localization.dart';
 import 'package:oronbox/src/app/widgets/network_img_layer.dart';
 import 'package:oronbox/src/app/widgets/sys_app_bar.dart';
+import 'package:oronbox/src/core/constants/style_constants.dart';
 import 'package:oronbox/src/core/services/shared_prefs_service.dart';
 import 'package:oronbox/src/data/bandbbs/bandbbs_resource_provider.dart';
 import 'package:oronbox/src/data/community/community_source.dart';
@@ -246,9 +249,8 @@ class _CreatorCreateWizardState extends ConsumerState<CreatorCreateWizard> {
         }
         if (item.ref.source == CommunitySourceId.bandbbs &&
             binding['provider'] == 'bandbbs' &&
-            parseCreatorBandBbsBinding(
-              binding['external_id'],
-            ).any((entry) => entry.resourceId == item.ref.id)) {
+            parseCreatorBandBbsBinding(binding['external_id'])
+                .any((entry) => entry.resourceId == item.ref.id)) {
           return true;
         }
       }
@@ -420,9 +422,9 @@ class _CreatorCreateWizardState extends ConsumerState<CreatorCreateWizard> {
           child: Text(l10n.cancel),
         ),
         TextButton(
-          onPressed: () => Navigator.of(
-            context,
-          ).pop(CommunityImportRecoveryAction.continueImport),
+          onPressed: () =>
+              Navigator.of(context)
+                  .pop(CommunityImportRecoveryAction.continueImport),
           child: Text(l10n.creatorImportContinuePartial),
         ),
         FilledButton(
@@ -580,6 +582,11 @@ class _CreatorCreateWizardState extends ConsumerState<CreatorCreateWizard> {
             artifacts: const [],
           ),
         );
+        final resourceId = controller.currentState.selected?.resource.id;
+        if (mounted && resourceId != null && resourceId.isNotEmpty) {
+          context.go('/resources/creator/resources/$resourceId');
+          return;
+        }
       }
       if (mounted) Navigator.of(context).pop();
     } catch (error) {
@@ -660,32 +667,36 @@ class _CreatorCreateWizardState extends ConsumerState<CreatorCreateWizard> {
                 .clamp(0, double.infinity)
                 .toDouble(),
           ),
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _ActionCard(
-                  icon: Icons.add_box_outlined,
-                  title: l10n.creatorNewResource,
-                  description: l10n.creatorNewResourceDescription,
-                  onTap: () => _chooseAction(_WizardAction.resource),
-                ),
-                const SizedBox(height: 12),
-                _ActionCard(
-                  icon: Icons.collections_bookmark_outlined,
-                  title: l10n.creatorNewCollection,
-                  description: l10n.creatorNewCollectionDescription,
-                  onTap: () => _chooseAction(_WizardAction.collection),
-                ),
-                const SizedBox(height: 12),
-                _ActionCard(
-                  icon: Icons.input_outlined,
-                  title: l10n.creatorImportExternal,
-                  description: l10n.creatorImportExternalDescription,
-                  onTap: () => _chooseAction(_WizardAction.import),
-                ),
-              ],
-            ),
+          child: SegmentedList(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            sections: [
+              SegmentedSection(
+                tiles: [
+                  SegmentedTile.navigation(
+                    leading: const Icon(Icons.add_box_outlined),
+                    title: Text(l10n.creatorNewResource),
+                    description: Text(l10n.creatorNewResourceDescription),
+                    trailing: const Icon(Icons.chevron_right),
+                    onPressed: (_) => _chooseAction(_WizardAction.resource),
+                  ),
+                  SegmentedTile.navigation(
+                    leading: const Icon(Icons.collections_bookmark_outlined),
+                    title: Text(l10n.creatorNewCollection),
+                    description: Text(l10n.creatorNewCollectionDescription),
+                    trailing: const Icon(Icons.chevron_right),
+                    onPressed: (_) => _chooseAction(_WizardAction.collection),
+                  ),
+                  SegmentedTile.navigation(
+                    leading: const Icon(Icons.input_outlined),
+                    title: Text(l10n.creatorImportExternal),
+                    description: Text(l10n.creatorImportExternalDescription),
+                    trailing: const Icon(Icons.chevron_right),
+                    onPressed: (_) => _chooseAction(_WizardAction.import),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -785,9 +796,8 @@ class _CreatorCreateWizardState extends ConsumerState<CreatorCreateWizard> {
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
                 l10n.creatorImportSameResourceHint,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: colors.onSurfaceVariant),
+                style: Theme.of(context).textTheme.bodySmall
+                    ?.copyWith(color: colors.onSurfaceVariant),
               ),
             ),
           ),
@@ -837,86 +847,17 @@ class _CreatorCreateWizardState extends ConsumerState<CreatorCreateWizard> {
                 )
               : RefreshIndicator(
                   onRefresh: _loadExternalItems,
-                  child: ListView.separated(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    itemCount: _items.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final item = _items[index];
-                      final imported = _isImported(item);
-                      final selected = _selected.containsKey(item.ref.key);
-                      final commit = item.sourceRepoCommitHash?.trim() ?? '';
-                      final sourceVersion =
-                          item.ref.source == CommunitySourceId.astroboxRepo
-                          ? (commit.length > 12
-                                ? commit.substring(0, 12)
-                                : commit)
-                          : item.version ?? '';
-                      return Opacity(
-                        opacity: imported ? 0.55 : 1,
-                        child: Card(
-                          elevation: 0,
-                          margin: EdgeInsets.zero,
-                          clipBehavior: Clip.antiAlias,
-                          child: InkWell(
-                            onTap: imported
-                                ? null
-                                : () => _toggleItem(item, !selected),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                children: [
-                                  NetworkImgLayer(
-                                    src:
-                                        (item.iconUrl ?? item.coverUrl)
-                                            ?.toString() ??
-                                        '',
-                                    width: 56,
-                                    height: 56,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          item.name,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.titleSmall,
-                                        ),
-                                        Text(
-                                          imported
-                                              ? l10n.creatorImportAlreadyImported
-                                              : sourceVersion,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodySmall,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Checkbox(
-                                    value: imported || selected,
-                                    onChanged: imported
-                                        ? null
-                                        : (value) =>
-                                              _toggleItem(item, value == true),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
+                  child: SegmentedList(
+                    maxWidth: StyleConstants.pageMaxWidth,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    contentPadding: const EdgeInsets.only(bottom: 16),
+                    sections: [
+                      SegmentedSection(
+                        tiles: [
+                          for (final item in _items) _importTile(item, l10n),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
         ),
@@ -925,6 +866,33 @@ class _CreatorCreateWizardState extends ConsumerState<CreatorCreateWizard> {
   }
 
   Widget _importProgress(AppLocalizations l10n) => _progressBody(l10n);
+
+  AbstractSegmentedTile _importTile(
+    CommunityResource item,
+    AppLocalizations l10n,
+  ) {
+    final imported = _isImported(item);
+    final selected = _selected.containsKey(item.ref.key);
+    final commit = item.sourceRepoCommitHash?.trim() ?? '';
+    final sourceVersion = item.ref.source == CommunitySourceId.astroboxRepo
+        ? (commit.length > 12 ? commit.substring(0, 12) : commit)
+        : item.version ?? '';
+    return SegmentedTile.checkboxTile(
+      initialValue: imported || selected,
+      onToggle: (value) => _toggleItem(item, value == true),
+      enabled: !imported,
+      leading: NetworkImgLayer(
+        src: (item.iconUrl ?? item.coverUrl)?.toString() ?? '',
+        width: 56,
+        height: 56,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      title: Text(item.name),
+      description: Text(
+        imported ? l10n.creatorImportAlreadyImported : sourceVersion,
+      ),
+    );
+  }
 
   Widget _progressBody(AppLocalizations l10n) {
     final stage = _stage;
@@ -1177,56 +1145,4 @@ class _ImportLogEntry {
 
   final _ImportLogLevel level;
   final String message;
-}
-
-class _ActionCard extends StatelessWidget {
-  const _ActionCard({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final String description;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Material(
-      color: colors.surfaceContainerHigh,
-      borderRadius: BorderRadius.circular(16),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          child: Row(
-            children: [
-              Icon(icon, size: 28, color: colors.primary),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 4),
-                    Text(
-                      description,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

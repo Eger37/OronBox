@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:oronbox/src/app/generated/app_localizations.dart';
@@ -146,7 +146,9 @@ class _CreatorCollectionPageState extends ConsumerState<CreatorCollectionPage> {
           .where((entry) => entry.resource.id == created.resource.id)
           .firstOrNull;
       if (attached != null) controller.select(attached);
-      if (mounted) context.push('/resources/creator/resource');
+      if (mounted) {
+        context.push('/resources/creator/resources/${created.resource.id}');
+      }
     } catch (error) {
       if (mounted) showCreatorFailure(context, error);
     } finally {
@@ -329,7 +331,9 @@ class _CreatorCollectionPageState extends ConsumerState<CreatorCollectionPage> {
                           controller: controller,
                           onTap: () {
                             controller.select(workspace);
-                            context.push('/resources/creator/resource');
+                            context.push(
+                              '/resources/creator/resources/${workspace.resource.id}',
+                            );
                           },
                         ),
                       ),
@@ -441,9 +445,9 @@ class _CollectionMediaCardState extends State<_CollectionMediaCard> {
               borderRadius: BorderRadius.circular(8),
               child: _bytes == null
                   ? ColoredBox(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest,
                       child: const Icon(Icons.image_outlined),
                     )
                   : Image.memory(_bytes!, fit: BoxFit.contain),

@@ -15,6 +15,7 @@ import 'package:oronbox/src/core/services/shared_prefs_service.dart';
 import 'package:oronbox/src/device/core/connect_type.dart';
 import 'package:oronbox/src/device/core/event_bus.dart';
 import 'package:oronbox/src/device/core/watchface_install_policy.dart';
+import 'package:oronbox/src/device/xiaomi/components/health_system.dart';
 import 'package:oronbox/src/data/community/community_source.dart';
 import 'package:oronbox/src/data/bandbbs/bandbbs_resource_provider.dart';
 import 'package:oronbox/src/data/huami/huami_app_store_resource_provider.dart';
@@ -432,6 +433,9 @@ class LocalCommandBus implements OronBoxCommandBus, ActiveOperationController {
     'device.xiaomi.health.sync' => _manager.syncXiaomiHealth().then(
       (value) => value.toJson(),
     ),
+    'device.xiaomi.health.snapshot.replay' => _replayXiaomiHealthSnapshot(
+      command.params,
+    ),
     'device.xiaomi.appLayout.get' => _getXiaomiAppLayout(),
     'device.xiaomi.appLayout.set' => _setXiaomiAppLayout(command.params),
     'device.xiaomi.recordings.download' => _downloadXiaomiRecordings(),
@@ -582,6 +586,42 @@ class LocalCommandBus implements OronBoxCommandBus, ActiveOperationController {
     ),
     'announcement.read' => _creatorRequest('POST', '/api/announcements/read'),
     'creator.list' => _creatorRequest('GET', '/api/creator/resources'),
+    'creator.reviews' => _creatorRequest(
+      'GET',
+      '/api/creator/reviews',
+      query: {
+        'limit': command.params['limit'] ?? 30,
+        if (command.params['cursor'] != null &&
+            command.params['cursor'].toString().isNotEmpty)
+          'cursor': command.params['cursor'],
+      },
+    ),
+    'creator.review' => _creatorRequest(
+      'GET',
+      '/api/creator/reviews/${_requiredCreatorId(command.params, 'review')}',
+    ),
+    'creator.review.astrobox' => _creatorRequest(
+      'GET',
+      '/api/creator/reviews/${_requiredCreatorId(command.params, 'review')}/astrobox',
+    ),
+    'creator.review.astrobox.comments' => _creatorRequest(
+      'GET',
+      '/api/creator/reviews/${_requiredCreatorId(command.params, 'review')}/astrobox/comments',
+    ),
+    'creator.review.astrobox.comment.create' => _creatorRequest(
+      'POST',
+      '/api/creator/reviews/${_requiredCreatorId(command.params, 'review')}/astrobox/comments',
+      data: {'body': command.params['body']},
+    ),
+    'creator.review.astrobox.comment.update' => _creatorRequest(
+      'PATCH',
+      '/api/creator/reviews/${_requiredCreatorId(command.params, 'review')}/astrobox/comments/${_requiredCreatorId(command.params, 'comment')}',
+      data: {'body': command.params['body']},
+    ),
+    'creator.review.astrobox.comment.delete' => _creatorRequest(
+      'DELETE',
+      '/api/creator/reviews/${_requiredCreatorId(command.params, 'review')}/astrobox/comments/${_requiredCreatorId(command.params, 'comment')}',
+    ),
     'creator.devices' => _creatorRequest('GET', '/api/devices'),
     'creator.grants' => _creatorRequest('GET', '/api/me/grants'),
     'creator.github.start' => _creatorRequest(
@@ -1604,6 +1644,31 @@ class LocalCommandBus implements OronBoxCommandBus, ActiveOperationController {
     await _ensureConnected(null);
     await _manager.syncDevice();
     return _deviceStateJson(_state);
+  }
+
+  Future<Object?> _replayXiaomiHealthSnapshot(
+    Map<String, Object?> params,
+  ) async {
+    final deviceId = params['deviceId']?.toString();
+    final rawFiles = params['files'];
+    if (deviceId == null || deviceId.isEmpty || rawFiles is! List) {
+      throw const FormatException('Invalid Xiaomi health snapshot replay');
+    }
+    final files = rawFiles
+        .whereType<Map>()
+        .map(
+          (file) => XiaomiActivityRawFile(
+            id: file['id']?.toString() ?? '',
+            data: base64Decode(file['data']?.toString() ?? ''),
+          ),
+        )
+        .where((file) => file.id.isNotEmpty && file.data.isNotEmpty)
+        .toList(growable: false);
+    if (files.isEmpty) {
+      throw const FormatException('Xiaomi health snapshot has no files');
+    }
+    final value = await _manager.replayXiaomiHealthSnapshot(deviceId, files);
+    return value.toJson();
   }
 
   Future<Object?> _uploadXiaomiMusic(Map<String, Object?> params) async {

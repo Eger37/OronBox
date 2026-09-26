@@ -91,6 +91,8 @@ class CreatorWorkspaceController extends Notifier<CreatorWorkspaceState> {
 
   OronBoxCommandBus get _host => ref.read(applicationHostProvider);
 
+  CreatorWorkspaceState get currentState => state;
+
   Future<Object?> _execute(
     String method, [
     Map<String, Object?> params = const {},
@@ -214,6 +216,22 @@ class CreatorWorkspaceController extends Notifier<CreatorWorkspaceState> {
     selected: workspace,
     clearSelected: workspace == null,
   );
+
+  Future<bool> openResource(String resourceId) async {
+    final existing = state.resources
+        .where((item) => item.resource.id == resourceId)
+        .firstOrNull;
+    if (existing != null) {
+      select(existing);
+      return true;
+    }
+    await refresh();
+    final loaded = state.resources
+        .where((item) => item.resource.id == resourceId)
+        .firstOrNull;
+    select(loaded);
+    return loaded != null;
+  }
 
   Future<void> create(
     String slug,

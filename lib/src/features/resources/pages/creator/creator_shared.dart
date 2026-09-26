@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:oronbox/src/app/generated/app_localizations.dart';
 import 'package:oronbox/src/app/utils/error_localization.dart';
+import 'package:oronbox/src/app/widgets/markdown_style_sheet.dart';
 import 'package:oronbox/src/features/resources/application/creator/creator_workspace_controller.dart';
 import 'package:oronbox/src/features/resources/domain/creator_workspace.dart';
 import 'package:oronbox/src/features/settings/pages/legal_documents_page.dart';
@@ -26,8 +27,16 @@ String creatorWorkspaceState(CreatorWorkspace workspace) {
   if (workspace.revisions.isEmpty) return 'draft';
   if (workspace.latestRevision?.state == 'draft') return 'draft';
   final review = workspace.review?['state']?.toString();
-  if (review == 'pending') return 'pending';
-  if (review == 'rejected') return 'rejected';
+  if (review == 'pending' ||
+      review == 'reviewing' ||
+      review == 'fixed_pending_review') {
+    return 'pending';
+  }
+  if (review == 'rejected' ||
+      review == 'needs_changes' ||
+      review == 'changes_requested') {
+    return 'rejected';
+  }
   if (workspace.publications.any(
     (publication) => publication['state'] == 'failed',
   )) {
@@ -49,6 +58,10 @@ String creatorStateLabel(AppLocalizations l10n, String state) =>
       'pending' || 'submitted' => l10n.pendingReview,
       'approved' => l10n.creatorStateApproved,
       'rejected' => l10n.creatorReviewRejected,
+      'needs_changes' ||
+      'changes_requested' => l10n.creatorReviewChangesRequested,
+      'fixed_pending_review' => l10n.creatorReviewFixedPending,
+      'closed' => l10n.creatorReviewClosed,
       'published' => l10n.published,
       'reviewing' => l10n.creatorStateExternalReview,
       'failed' => l10n.creatorStateFailed,
@@ -213,9 +226,8 @@ class CreatorStateBadge extends StatelessWidget {
       ),
       child: Text(
         creatorStateLabel(AppLocalizations.of(context)!, state),
-        style: Theme.of(
-          context,
-        ).textTheme.labelSmall?.copyWith(color: foreground),
+        style: Theme.of(context).textTheme.labelSmall
+            ?.copyWith(color: foreground),
       ),
     );
   }
@@ -319,9 +331,8 @@ class CreatorSectionTitle extends StatelessWidget {
       const SizedBox(width: 10),
       Text(
         title,
-        style: Theme.of(
-          context,
-        ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+        style: Theme.of(context).textTheme.titleMedium
+            ?.copyWith(fontWeight: FontWeight.w600),
       ),
     ],
   );
@@ -393,7 +404,7 @@ class CreatorReviewRulesDialog extends ConsumerWidget {
                             data: snapshot.data!,
                             selectable: true,
                             padding: const EdgeInsets.fromLTRB(20, 12, 20, 16),
-                            styleSheet: MarkdownStyleSheet.fromTheme(theme)
+                            styleSheet: markdownStyleSheetFromTheme(theme)
                                 .copyWith(
                                   p: theme.textTheme.bodyMedium?.copyWith(
                                     height: 1.5,
