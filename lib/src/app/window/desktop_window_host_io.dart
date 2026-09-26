@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui' show AppExitResponse;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart' hide Image;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
@@ -22,12 +22,20 @@ class DesktopWindowHost extends ConsumerStatefulWidget {
 }
 
 class _DesktopWindowHostState extends ConsumerState<DesktopWindowHost>
-    with WindowListener, TrayListener {
+    with WindowListener {
   static const _exitBehaviorKey = 'desktop.exit_behavior';
   bool _initialized = false;
   bool _showingDialog = false;
   bool _exiting = false;
   AppLifecycleListener? _lifecycleListener;
+  TrayIcon? _trayIcon;
+  Image? _trayImage;
+  Menu? _trayMenu;
+  MenuItem? _showMenuItem;
+  MenuItem? _exitMenuItem;
+  ListenerId? _trayListenerId;
+  ListenerId? _showMenuListenerId;
+  ListenerId? _exitMenuListenerId;
 
   bool get _isDesktop =>
       Platform.isWindows || Platform.isLinux || Platform.isMacOS;
@@ -57,22 +65,52 @@ class _DesktopWindowHostState extends ConsumerState<DesktopWindowHost>
   Future<void> _initialize() async {
     final l10n = AppLocalizations.of(context)!;
     windowManager.addListener(this);
-    trayManager.addListener(this);
     await windowManager.setPreventClose(true);
     final icon = Platform.isWindows
         ? 'assets/images/tray_icon.ico'
         : 'assets/images/tray_icon.png';
-    await trayManager.setIcon(icon);
-    if (!Platform.isLinux) await trayManager.setToolTip('OronBox');
-    await trayManager.setContextMenu(
-      Menu(
-        items: [
-          MenuItem(key: 'show', label: l10n.desktopTrayShow),
-          MenuItem.separator(),
-          MenuItem(key: 'exit', label: l10n.desktopTrayExit),
-        ],
-      ),
+    final trayIcon = TrayIcon.create();
+    if (trayIcon == null) return;
+    _trayIcon = trayIcon;
+    trayIcon.setContextMenuTrigger(ContextMenuTrigger.rightClicked);
+    final trayImage = ImageAsset.fromAsset(icon);
+    if (trayImage != null) {
+      _trayImage = trayImage;
+      trayIcon.icon = trayImage;
+    }
+    trayIcon.setVisible(true);
+    if (!Platform.isLinux) trayIcon.setTooltip('OronBox');
+
+    final menu = Menu.create();
+    final showItem = MenuItem.createWithLabelAndType(
+      l10n.desktopTrayShow,
+      MenuItemType.normal,
     );
+    final exitItem = MenuItem.createWithLabelAndType(
+      l10n.desktopTrayExit,
+      MenuItemType.normal,
+    );
+    _trayMenu = menu;
+    _showMenuItem = showItem;
+    _exitMenuItem = exitItem;
+    if (menu == null || showItem == null || exitItem == null) {
+      _disposeTray();
+      return;
+    }
+    menu
+      ..addItem(showItem)
+      ..addSeparator()
+      ..addItem(exitItem);
+    trayIcon.setContextMenu(menu);
+    _showMenuListenerId = showItem.addListener((event) {
+      if (event is MenuItemClickedEvent) unawaited(_showWindow());
+    });
+    _exitMenuListenerId = exitItem.addListener((event) {
+      if (event is MenuItemClickedEvent) unawaited(_exitApplication());
+    });
+    _trayListenerId = trayIcon.addListener((event) {
+      if (event is TrayIconClickedEvent) unawaited(_showWindow());
+    });
   }
 
   @override
@@ -80,27 +118,44 @@ class _DesktopWindowHostState extends ConsumerState<DesktopWindowHost>
     _lifecycleListener?.dispose();
     if (_isDesktop) {
       windowManager.removeListener(this);
-      trayManager.removeListener(this);
+      _disposeTray();
     }
     super.dispose();
+  }
+
+  void _disposeTray() {
+    final trayIcon = _trayIcon;
+    if (trayIcon != null) {
+      if (_trayListenerId case final listenerId?) {
+        trayIcon.removeListener(listenerId);
+      }
+      trayIcon.setContextMenu(null);
+    }
+    if (_showMenuListenerId case final listenerId?) {
+      _showMenuItem?.removeListener(listenerId);
+    }
+    if (_exitMenuListenerId case final listenerId?) {
+      _exitMenuItem?.removeListener(listenerId);
+    }
+    _trayMenu?.dispose();
+    _showMenuItem?.dispose();
+    _exitMenuItem?.dispose();
+    _trayImage?.dispose();
+    _trayIcon?.dispose();
+    _trayListenerId = null;
+    _showMenuListenerId = null;
+    _exitMenuListenerId = null;
+    _trayMenu = null;
+    _showMenuItem = null;
+    _exitMenuItem = null;
+    _trayImage = null;
+    _trayIcon = null;
   }
 
   Future<void> _showWindow() async {
     await windowManager.show();
     if (await windowManager.isMinimized()) await windowManager.restore();
     await windowManager.focus();
-  }
-
-  @override
-  void onTrayIconMouseDown() => _showWindow();
-
-  @override
-  void onTrayIconRightMouseDown() => trayManager.popUpContextMenu();
-
-  @override
-  void onTrayMenuItemClick(MenuItem menuItem) {
-    if (menuItem.key == 'show') _showWindow();
-    if (menuItem.key == 'exit') unawaited(_exitApplication());
   }
 
   Future<void> _exitApplication() async {
@@ -122,13 +177,9 @@ class _DesktopWindowHostState extends ConsumerState<DesktopWindowHost>
     try {
       await host.close().timeout(const Duration(seconds: 2));
     } catch (_) {}
-    try {
-      await trayManager.destroy().timeout(const Duration(seconds: 1));
-    } catch (_) {
-    } finally {
-      forcedExit.cancel();
-      exit(0);
-    }
+    _disposeTray();
+    forcedExit.cancel();
+    exit(0);
   }
 
   @override

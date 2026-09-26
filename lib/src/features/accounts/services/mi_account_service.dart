@@ -15,9 +15,9 @@ import 'package:oronbox/src/features/accounts/models/mi_account_models.dart';
 /// Extracts bound-device credentials from a Xiaomi Fitness wearable-log ZIP.
 ///
 /// Xiaomi devices expose the device key as `encrypt_key`, while Huami devices
-/// use `auth_key`. Only complete source-list records with a valid MAC and a
-/// 16-byte hexadecimal key are returned; account-cookie `auth_key` values are
-/// therefore ignored.
+/// use `auth_key`. Records with a valid device key and an address (complete or
+/// redacted) are returned; account-cookie `auth_key` values are therefore
+/// ignored.
 List<MiCloudDevice> extractMiDevicesFromWearableLogZip(List<int> bytes) {
   const maxArchiveBytes = 64 * 1024 * 1024;
   const maxLogBytes = 32 * 1024 * 1024;
@@ -28,23 +28,34 @@ List<MiCloudDevice> extractMiDevicesFromWearableLogZip(List<int> bytes) {
 
   final archive = ZipDecoder().decodeBytes(bytes);
   final candidates = <String, MiCloudDevice>{};
+  final logAddresses = <String>{};
   var totalLogBytes = 0;
-  final recordPattern = RegExp(
-    r'\{"sid":"(?:\\.|[^"])*".*?"detail":\{[^{}]*\}\}',
-    dotAll: true,
-  );
-  final responsePattern = RegExp(
-    r'provideHttpLog:\s*(\{"code":0.*"result":\{"list":\[.*\]\}\})',
-  );
   final keyPattern = RegExp(r'^[0-9a-fA-F]{32}$');
   final macPattern = RegExp(r'^(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$');
+  final macSuffixPattern = RegExp(r'^[0-9a-fA-F]{2}(?::[0-9a-fA-F]{2}){1,5}$');
+  final embeddedMacPattern = RegExp(
+    r'(?<![0-9a-fA-F])(?:[0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}(?![0-9a-fA-F])',
+  );
+  final deviceJsonLogPattern = RegExp(
+    r'^XiaomiFit\.(?:device|main)\.log(?:\.bak\.\d+)?$',
+  );
+  final logFilePattern = RegExp(r'\.log(?:\.bak\.\d+)?$');
 
   void addRecord(Map<dynamic, dynamic> value) {
     final device = MiCloudDevice.fromJson(value.cast<String, dynamic>());
-    final mac = device.mac.trim().toUpperCase();
+    final mac = _normalizeLogMac(device.mac);
     final authKey = device.authKey.trim().toLowerCase();
-    if (!macPattern.hasMatch(mac) || !keyPattern.hasMatch(authKey)) return;
-    candidates[mac] = MiCloudDevice(
+    if ((!macPattern.hasMatch(mac) && !macSuffixPattern.hasMatch(mac)) ||
+        !keyPattern.hasMatch(authKey)) {
+      return;
+    }
+    final candidateId = [
+      device.model,
+      device.name,
+      device.serialNumber,
+      mac,
+    ].join('|');
+    candidates[candidateId] = MiCloudDevice(
       name: device.name.trim(),
       model: device.model.trim(),
       mac: mac,
@@ -57,9 +68,7 @@ List<MiCloudDevice> extractMiDevicesFromWearableLogZip(List<int> bytes) {
   for (final file in archive.files) {
     if (!file.isFile) continue;
     final name = file.name.split(RegExp(r'[/\\]')).last;
-    if (!RegExp(
-      r'^XiaomiFit\.(?:device|main)\.log(?:\.bak\.\d+)?$',
-    ).hasMatch(name)) {
+    if (!logFilePattern.hasMatch(name)) {
       continue;
     }
     if (file.size > maxLogBytes) continue;
@@ -71,31 +80,125 @@ List<MiCloudDevice> extractMiDevicesFromWearableLogZip(List<int> bytes) {
     final content = file.readBytes();
     if (content == null) continue;
     final log = utf8.decode(content, allowMalformed: true);
-    for (final match in responsePattern.allMatches(log)) {
-      try {
-        final value = jsonDecode(match.group(1)!);
-        List? list;
-        if (value is Map && value['result'] is Map) {
-          list = (value['result'] as Map)['list'] as List?;
-        }
-        for (final record in list ?? const []) {
-          if (record is Map) addRecord(record);
-        }
-      } on FormatException {
-        // Fall through to individual-record recovery below.
-      }
+    for (final match in embeddedMacPattern.allMatches(log)) {
+      logAddresses.add(_normalizeLogMac(match.group(0)!));
     }
-    for (final match in recordPattern.allMatches(log)) {
-      try {
-        final value = jsonDecode(match.group(0)!);
-        if (value is Map) addRecord(value);
-      } on FormatException {
-        // Logs can end mid-line. Ignore incomplete records and keep scanning.
+    if (deviceJsonLogPattern.hasMatch(name)) {
+      for (final value in _scanJsonObjects(log)) {
+        _visitDeviceJson(value, addRecord);
       }
     }
     file.clear();
   }
-  return candidates.values.toList(growable: false);
+  // A device can appear both as a full-MAC record and as a redacted-suffix
+  // record, producing two candidates with the same authKey. Deduplicate after
+  // address resolution and prefer the entry that carries a complete MAC.
+  final resolvedByIdentity = <String, MiCloudDevice>{};
+  for (final device in candidates.values) {
+    final address = resolveMiCloudDeviceAddress(device, logAddresses);
+    final resolved = address == null
+        ? device
+        : MiCloudDevice(
+            name: device.name,
+            model: device.model,
+            mac: address,
+            authKey: device.authKey,
+            firmwareVersion: device.firmwareVersion,
+            serialNumber: device.serialNumber,
+          );
+    final identity = '${resolved.authKey}|${resolved.serialNumber}';
+    final existing = resolvedByIdentity[identity];
+    if (existing == null ||
+        (!macPattern.hasMatch(existing.mac) &&
+            macPattern.hasMatch(resolved.mac))) {
+      resolvedByIdentity[identity] = resolved;
+    }
+  }
+  return resolvedByIdentity.values.toList(growable: false);
+}
+
+String _normalizeLogMac(String value) {
+  final normalized = value.trim().replaceAll('-', ':').toUpperCase();
+  return normalized;
+}
+
+/// Yields complete JSON objects embedded in Xiaomi's line-oriented logs.
+///
+/// The app writes both compact HTTP responses and pretty-printed device
+/// snapshots. Matching a single fixed record shape misses the latter and also
+/// breaks as soon as Xiaomi adds a nested object. A small balanced-brace
+/// scanner keeps this parser independent of the surrounding log prefix while
+/// still avoiding a permissive regex over the whole archive.
+Iterable<Object?> _scanJsonObjects(String source) sync* {
+  const maxObjectBytes = 4 * 1024 * 1024;
+  var start = -1;
+  var depth = 0;
+  var inString = false;
+  var escaped = false;
+
+  for (var index = 0; index < source.length; index += 1) {
+    final char = source.codeUnitAt(index);
+    if (start < 0) {
+      if (char == 0x7b) {
+        start = index;
+        depth = 1;
+        inString = false;
+        escaped = false;
+      }
+      continue;
+    }
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (char == 0x5c) {
+        escaped = true;
+      } else if (char == 0x22) {
+        inString = false;
+      }
+      continue;
+    }
+    if (char == 0x22) {
+      inString = true;
+    } else if (char == 0x7b) {
+      depth += 1;
+    } else if (char == 0x7d) {
+      depth -= 1;
+      if (depth == 0) {
+        final fragment = source.substring(start, index + 1);
+        try {
+          yield jsonDecode(fragment);
+        } on FormatException {
+          // Plain-text log messages also contain braces; ignore those.
+        }
+        start = -1;
+      }
+    }
+
+    if (start >= 0 && index - start >= maxObjectBytes) {
+      start = -1;
+      depth = 0;
+      inString = false;
+      escaped = false;
+    }
+  }
+}
+
+void _visitDeviceJson(Object? value, void Function(Map<dynamic, dynamic>) add) {
+  if (value is Map) {
+    final detail = value['detail'];
+    if (detail is Map &&
+        (value.containsKey('model') || value.containsKey('name'))) {
+      add(value);
+    }
+    for (final child in value.values) {
+      _visitDeviceJson(child, add);
+    }
+  } else if (value is List) {
+    for (final child in value) {
+      _visitDeviceJson(child, add);
+    }
+  }
 }
 
 class MiAccountService {
@@ -594,10 +697,7 @@ class MiAccountService {
         await invalidateStoredToken(token);
         throw const MiAccountSessionExpired();
       }
-      final refreshed = await refreshToken(
-        token: token,
-        userAgent: userAgent,
-      );
+      final refreshed = await refreshToken(token: token, userAgent: userAgent);
       return _miServiceCallEncrypted(
         token: refreshed,
         url: url,

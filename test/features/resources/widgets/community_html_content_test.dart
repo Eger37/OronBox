@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:oronbox/src/features/resources/widgets/community_html_content.dart';
 
@@ -10,8 +10,7 @@ void main() {
       const MaterialApp(
         home: Scaffold(
           body: CommunityHtmlContent(
-            html:
-                '<p>Hello <strong>OronBox</strong></p><blockquote>Quote</blockquote><script>bad()</script>',
+            html: '<p>Hello <strong>OronBox</strong></p><blockquote>Quote</blockquote><script>bad()</script>',
           ),
         ),
       ),

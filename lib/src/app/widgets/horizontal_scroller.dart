@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A horizontally scrolling row of items with desktop-friendly affordances:
 /// a draggable scrollbar and left/right buttons that appear when there is

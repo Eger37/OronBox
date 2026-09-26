@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Displays release notes using the same selectable text style as the
 /// firmware page, while parsing the small block syntax used by release

@@ -15,10 +15,7 @@ import java.util.Date
 import java.util.Locale
 
 private const val COMPACT_WIDTH_DP = 160
-// One launcher row is commonly reported as 100-120dp rather than the nominal
-// 72dp from provider metadata. Keep every one-row placement on the compact
-// layout; the medium layout needs a genuine second row.
-private const val COMPACT_HEIGHT_DP = 160
+private const val COMPACT_HEIGHT_DP = 96
 private const val STALE_AFTER_MS = 6 * 60 * 60 * 1000L
 
 private data class WidgetColors(
@@ -281,12 +278,10 @@ internal object StatusWidgetUpdater {
 private fun valueOrDash(value: Int): String = if (value >= 0) value.toString() else "—"
 
 private fun widgetTier(minWidthDp: Int, minHeightDp: Int): Int {
-    // Some launchers omit height during the first update. Keep the old
-    // width-based fallback for that one pass, then switch templates when the
-    // real bounds arrive through onAppWidgetOptionsChanged.
-    val heightKnown = minHeightDp > 0
+    // Some launchers omit height during the first update. Keep that pass
+    // compact; onAppWidgetOptionsChanged will re-render when bounds arrive.
     if (minWidthDp < COMPACT_WIDTH_DP ||
-        (heightKnown && minHeightDp < COMPACT_HEIGHT_DP)
+        minHeightDp < COMPACT_HEIGHT_DP
     ) {
         return 0
     }

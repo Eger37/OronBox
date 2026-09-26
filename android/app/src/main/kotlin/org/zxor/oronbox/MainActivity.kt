@@ -29,6 +29,7 @@ import android.os.Looper
 import android.os.Process
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.util.Log
 import android.view.ViewGroup
 import android.view.Window
 import android.webkit.CookieManager
@@ -59,6 +60,8 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.concurrent.atomic.AtomicReference
 
 class MainActivity : FlutterActivity() {
+    private class BondRemovalException(message: String) : IOException(message)
+
     @Volatile
     private var sppSocket: BluetoothSocket? = null
     @Volatile
@@ -89,6 +92,7 @@ class MainActivity : FlutterActivity() {
     private var fileOpenChannel: MethodChannel? = null
     private var pendingOpenFilePath: String? = null
     private var pendingWearableLogResult: MethodChannel.Result? = null
+    private var pendingWearableLogPermissionResult: MethodChannel.Result? = null
     private var pendingScreenshotSave: PendingScreenshotSave? = null
     private var pendingBluetoothPermissionResult: MethodChannel.Result? = null
     private var pendingBluetoothPermissionContinuation: (() -> Unit)? = null
@@ -106,8 +110,10 @@ class MainActivity : FlutterActivity() {
     )
 
     companion object {
+        private const val LOG_TAG = "OronBoxBluetooth"
         private const val NOTIFICATION_PERMISSION_REQUEST = 0x5A12
         private const val SCREENSHOT_STORAGE_PERMISSION_REQUEST = 0x5A13
+        private const val WEARABLE_LOG_STORAGE_PERMISSION_REQUEST = 0x5A14
         private const val BLUETOOTH_PERMISSION_REQUEST = 0x5A10
         private const val WEARABLE_LOG_DIRECTORY_REQUEST = 0x5A11
         private const val WEARABLE_LOG_DIRECTORY_PREF = "wearable_log_directory"
@@ -214,6 +220,38 @@ class MainActivity : FlutterActivity() {
             }
         } catch (_: Exception) {
             // The process may be in a failing state; do not throw from logging.
+        }
+    }
+
+    private fun emitSppDiagnostic(
+        level: String,
+        message: String,
+        fields: Map<String, Any?> = emptyMap(),
+        error: Throwable? = null,
+    ) {
+        when (level) {
+            "FINE" -> Log.d(LOG_TAG, message)
+            "WARNING" -> if (error == null) {
+                Log.w(LOG_TAG, message)
+            } else {
+                Log.w(LOG_TAG, message, error)
+            }
+            "SEVERE" -> if (error == null) {
+                Log.e(LOG_TAG, message)
+            } else {
+                Log.e(LOG_TAG, message, error)
+            }
+            else -> Log.i(LOG_TAG, message)
+        }
+        mainHandler.post {
+            val event = mutableMapOf<String, Any?>(
+                "event" to "diagnostic",
+                "level" to level,
+                "message" to message,
+            )
+            if (fields.isNotEmpty()) event["fields"] = fields
+            if (error != null) event["error"] = error.toString()
+            eventSink?.success(event)
         }
     }
 
@@ -753,6 +791,20 @@ class MainActivity : FlutterActivity() {
             }
             return
         }
+        if (requestCode == WEARABLE_LOG_STORAGE_PERMISSION_REQUEST) {
+            val pending = pendingWearableLogPermissionResult ?: return
+            pendingWearableLogPermissionResult = null
+            if (grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED) {
+                readLatestWearableLogFromLegacyStorage(pending)
+            } else {
+                pending.error(
+                    "WEARABLE_LOG_PERMISSION_DENIED",
+                    "Storage permission is required to read Xiaomi Fitness logs",
+                    null,
+                )
+            }
+            return
+        }
         if (requestCode != SCREENSHOT_STORAGE_PERMISSION_REQUEST) return
 
         val pending = pendingScreenshotSave ?: return
@@ -769,6 +821,28 @@ class MainActivity : FlutterActivity() {
     }
 
     private fun scanLatestWearableLog(result: MethodChannel.Result) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.Q) {
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) !=
+                PackageManager.PERMISSION_GRANTED
+            ) {
+                if (pendingWearableLogPermissionResult != null) {
+                    result.error(
+                        "BUSY",
+                        "A wearable log scan is already running",
+                        null,
+                    )
+                    return
+                }
+                pendingWearableLogPermissionResult = result
+                requestPermissions(
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    WEARABLE_LOG_STORAGE_PERMISSION_REQUEST,
+                )
+            } else {
+                readLatestWearableLogFromLegacyStorage(result)
+            }
+            return
+        }
         val saved = getPreferences(Context.MODE_PRIVATE)
             .getString(WEARABLE_LOG_DIRECTORY_PREF, null)
         if (saved == null) {
@@ -813,10 +887,14 @@ class MainActivity : FlutterActivity() {
             return
         }
         try {
-            contentResolver.takePersistableUriPermission(
-                treeUri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION,
-            )
+            val takeFlags = (data?.flags ?: 0) and
+                (Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+            if (takeFlags and Intent.FLAG_GRANT_READ_URI_PERMISSION == 0) {
+                result.error("READ_FAILED", "Read permission was not granted", null)
+                return
+            }
+            contentResolver.takePersistableUriPermission(treeUri, takeFlags)
             getPreferences(Context.MODE_PRIVATE)
                 .edit()
                 .putString(WEARABLE_LOG_DIRECTORY_PREF, treeUri.toString())
@@ -849,24 +927,33 @@ class MainActivity : FlutterActivity() {
                     DocumentsContract.Document.COLUMN_SIZE,
                 )
                 contentResolver.query(childrenUri, projection, null, null, null)?.use { cursor ->
-                    val idColumn = cursor.getColumnIndexOrThrow(
+                    val idColumn = cursor.getColumnIndex(
                         DocumentsContract.Document.COLUMN_DOCUMENT_ID,
                     )
-                    val nameColumn = cursor.getColumnIndexOrThrow(
+                    val nameColumn = cursor.getColumnIndex(
                         DocumentsContract.Document.COLUMN_DISPLAY_NAME,
                     )
-                    val modifiedColumn = cursor.getColumnIndexOrThrow(
+                    val modifiedColumn = cursor.getColumnIndex(
                         DocumentsContract.Document.COLUMN_LAST_MODIFIED,
                     )
-                    val sizeColumn = cursor.getColumnIndexOrThrow(
+                    val sizeColumn = cursor.getColumnIndex(
                         DocumentsContract.Document.COLUMN_SIZE,
                     )
+                    if (idColumn < 0 || nameColumn < 0) {
+                        throw IOException("Wearable log provider returned incomplete metadata")
+                    }
                     while (cursor.moveToNext()) {
                         val name = cursor.getString(nameColumn) ?: continue
                         if (!name.lowercase().endsWith("log.zip")) continue
-                        val size = if (cursor.isNull(sizeColumn)) 0 else cursor.getLong(sizeColumn)
+                        val size = if (sizeColumn < 0 || cursor.isNull(sizeColumn)) {
+                            0
+                        } else {
+                            cursor.getLong(sizeColumn)
+                        }
                         if (size > MAX_WEARABLE_LOG_BYTES) continue
-                        val modified = if (cursor.isNull(modifiedColumn)) 0 else {
+                        val modified = if (modifiedColumn < 0 || cursor.isNull(modifiedColumn)) {
+                            0
+                        } else {
                             cursor.getLong(modifiedColumn)
                         }
                         if (
@@ -912,6 +999,41 @@ class MainActivity : FlutterActivity() {
                     } else {
                         result.error("READ_FAILED", error.message, null)
                     }
+                }
+            } catch (error: Exception) {
+                mainHandler.post {
+                    result.error("READ_FAILED", error.message, null)
+                }
+            }
+        }
+    }
+
+    /**
+     * Android 10 and older OEM document providers often cannot grant a usable
+     * tree URI for the shared Download directory. Xiaomi Fitness writes its
+     * export archives to this stable path, so use the legacy storage API after
+     * requesting the platform read permission on those releases.
+     */
+    private fun readLatestWearableLogFromLegacyStorage(result: MethodChannel.Result) {
+        wearableLogExecutor.execute {
+            try {
+                @Suppress("DEPRECATION")
+                val directory = File(
+                    Environment.getExternalStoragePublicDirectory(
+                        Environment.DIRECTORY_DOWNLOADS,
+                    ),
+                    "wearablelog",
+                )
+                val latest = directory.listFiles { file ->
+                    file.isFile &&
+                        file.name.lowercase().endsWith("log.zip") &&
+                        file.length() <= MAX_WEARABLE_LOG_BYTES
+                }?.maxWithOrNull(
+                    compareBy<File> { it.lastModified() }.thenBy { it.name },
+                ) ?: throw IOException("No wearable log ZIP was found")
+                val bytes = latest.readBytes()
+                mainHandler.post {
+                    result.success(mapOf("name" to latest.name, "bytes" to bytes))
                 }
             } catch (error: Exception) {
                 mainHandler.post {
@@ -1307,14 +1429,23 @@ class MainActivity : FlutterActivity() {
             // is still blocked in BluetoothSocket.connect().
             val generation = connectGeneration.incrementAndGet()
             closeSppTransport()
+            // Set when bond removal was requested but the unbond could not be
+            // confirmed. The connect may still succeed (stale bond that the
+            // remote accepts), so this only upgrades the reported error if
+            // every socket attempt subsequently failed.
+            var bondRemovalUnconfirmed = false
             try {
                 val adapter = BluetoothAdapter.getDefaultAdapter()
                     ?: throw IOException("BluetoothAdapter is unavailable")
                 val device = adapter.getRemoteDevice(addr)
 
                 if (adapter.isDiscovering) adapter.cancelDiscovery()
-                if (removeBond) resetBond(device)
-                ensureBonded(device)
+                // `resetBond` verifies the real bond state and never throws;
+                // an unconfirmed removal must not block a working connection.
+                if (removeBond && !resetBond(device, generation)) {
+                    bondRemovalUnconfirmed = true
+                }
+                ensureBonded(device, generation)
                 if (generation != connectGeneration.get()) {
                     throw IOException("SPP connect was cancelled")
                 }
@@ -1373,10 +1504,14 @@ class MainActivity : FlutterActivity() {
                 }
                 mainHandler.post {
                     result.error(
-                        if (generation == connectGeneration.get()) {
-                            "CONNECT_FAILED"
-                        } else {
-                            "CONNECT_CANCELLED"
+                        when {
+                            generation != connectGeneration.get() -> "CONNECT_CANCELLED"
+                            // An unconfirmed bond removal plus a failed
+                            // connect is exactly the case the UI can act on
+                            // (manual unpair in system settings).
+                            e is BondRemovalException || bondRemovalUnconfirmed ->
+                                "BOND_REMOVAL_FAILED"
+                            else -> "CONNECT_FAILED"
                         },
                         e.message ?: e.toString(),
                         null,
@@ -1422,9 +1557,23 @@ class MainActivity : FlutterActivity() {
         }
     }
 
+    /**
+     * Clears an existing bond before the SPP handshake.
+     *
+     * The hidden `removeBond()` API is unreliable across Android versions:
+     * Android 12+ frequently returns `false` even though the bond is removed
+     * asynchronously, and the `ACTION_BOND_STATE_CHANGED` broadcast can be
+     * delivered before the receiver is registered or not at all. Trusting the
+     * return value used to abort an otherwise healthy connection.
+     *
+     * This now verifies the *actual* bond state (broadcast plus polling) and
+     * never throws: an unconfirmed removal is reported as a warning and the
+     * connect flow continues so it can still try SPP. Returns true when the
+     * device is confirmed unbonded.
+     */
     @SuppressLint("MissingPermission")
-    private fun resetBond(device: BluetoothDevice) {
-        if (device.bondState == BluetoothDevice.BOND_NONE) return
+    private fun resetBond(device: BluetoothDevice, generation: Long): Boolean {
+        if (device.bondState == BluetoothDevice.BOND_NONE) return true
 
         val latch = CountDownLatch(1)
         val receiver = object : BroadcastReceiver() {
@@ -1442,32 +1591,98 @@ class MainActivity : FlutterActivity() {
                 if (changed?.address == device.address &&
                     changed.bondState == BluetoothDevice.BOND_NONE
                 ) {
+                    emitSppDiagnostic(
+                        level = "FINE",
+                        message = "bond state changed to NONE while removing bond",
+                        fields = mapOf("address" to device.address),
+                    )
                     latch.countDown()
                 }
             }
         }
 
         val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(receiver, filter, RECEIVER_EXPORTED)
-        } else {
-            @Suppress("DEPRECATION")
-            registerReceiver(receiver, filter)
-        }
         try {
-            val removed = runCatching {
+            // Register before invoking removeBond so a fast broadcast is not
+            // missed. A registration failure is not fatal: polling still
+            // observes the resulting bond state.
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    registerReceiver(receiver, filter, RECEIVER_EXPORTED)
+                } else {
+                    @Suppress("DEPRECATION")
+                    registerReceiver(receiver, filter)
+                }
+            } catch (e: Exception) {
+                emitSppDiagnostic(
+                    level = "WARNING",
+                    message = "failed to register bond state receiver: " +
+                        "${e.javaClass.simpleName}: ${e.message}",
+                    fields = mapOf("address" to device.address),
+                    error = e,
+                )
+            }
+
+            val accepted = try {
                 val method = device.javaClass.getMethod("removeBond")
                 method.invoke(device) as? Boolean ?: false
-            }.getOrDefault(false)
-            if (!removed && device.bondState != BluetoothDevice.BOND_NONE) {
-                throw IOException("removeBond() failed")
+            } catch (e: Exception) {
+                val cause = e.cause ?: e
+                emitSppDiagnostic(
+                    level = "WARNING",
+                    message = "removeBond() invocation failed: " +
+                        "${cause.javaClass.simpleName}: ${cause.message}",
+                    fields = mapOf("address" to device.address),
+                    error = cause,
+                )
+                false
             }
+            emitSppDiagnostic(
+                level = "INFO",
+                message = "removeBond() returned $accepted; " +
+                    "verifying bond state, currentState=${device.bondState}",
+                fields = mapOf(
+                    "address" to device.address,
+                    "bondState" to device.bondState,
+                ),
+            )
+
             if (device.bondState == BluetoothDevice.BOND_NONE) {
                 latch.countDown()
             }
-            if (!latch.await(10, TimeUnit.SECONDS)) {
-                throw IOException("Unpairing timed out")
+
+            // The return value is only a hint. Poll the real bond state for up
+            // to 3 seconds because some Android builds remove the bond without
+            // ever delivering a broadcast to a background receiver. The broadcast
+            // receiver above is the primary path; the poll only bounds the wait
+            // and must bail out immediately when a newer connect supersedes.
+            val deadline = System.currentTimeMillis() + 3_000
+            while (latch.count > 0 && System.currentTimeMillis() < deadline) {
+                if (generation != connectGeneration.get()) {
+                    throw IOException("SPP connect was cancelled")
+                }
+                if (device.bondState == BluetoothDevice.BOND_NONE) {
+                    latch.countDown()
+                    break
+                }
+                latch.await(150, TimeUnit.MILLISECONDS)
             }
+
+            val removed = device.bondState == BluetoothDevice.BOND_NONE
+            emitSppDiagnostic(
+                level = if (removed) "INFO" else "WARNING",
+                message = if (removed) {
+                    "bond removal confirmed"
+                } else {
+                    "bond removal could not be confirmed; continuing with " +
+                        "bondState=${device.bondState}"
+                },
+                fields = mapOf(
+                    "address" to device.address,
+                    "bondState" to device.bondState,
+                ),
+            )
+            return removed
         } finally {
             try {
                 unregisterReceiver(receiver)
@@ -1477,7 +1692,7 @@ class MainActivity : FlutterActivity() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun ensureBonded(device: BluetoothDevice) {
+    private fun ensureBonded(device: BluetoothDevice, generation: Long) {
         if (device.bondState == BluetoothDevice.BOND_BONDED) return
         val latch = CountDownLatch(1)
         val error = AtomicReference<Exception?>()
@@ -1496,35 +1711,88 @@ class MainActivity : FlutterActivity() {
                 if (changed?.address != device.address) return
                 when (changed.bondState) {
                     BluetoothDevice.BOND_BONDED -> latch.countDown()
-                    BluetoothDevice.BOND_NONE -> {
-                        error.set(IOException("Bonding failed"))
-                        latch.countDown()
-                    }
+                    // A BOND_NONE broadcast is handled by the polling loop,
+                    // which knows whether bonding was actually observed.
                 }
             }
         }
 
         val filter = IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(receiver, filter, RECEIVER_EXPORTED)
-        } else {
-            @Suppress("DEPRECATION")
-            registerReceiver(receiver, filter)
-        }
         try {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    registerReceiver(receiver, filter, RECEIVER_EXPORTED)
+                } else {
+                    @Suppress("DEPRECATION")
+                    registerReceiver(receiver, filter)
+                }
+            } catch (e: Exception) {
+                emitSppDiagnostic(
+                    level = "WARNING",
+                    message = "failed to register bond state receiver: " +
+                        "${e.javaClass.simpleName}: ${e.message}",
+                    fields = mapOf("address" to device.address),
+                    error = e,
+                )
+            }
+
+            // `createBond()` returning false is not authoritative: on several
+            // Android builds the bond still proceeds. Kick it off when needed
+            // and then verify the real state by broadcast and polling.
             if (device.bondState != BluetoothDevice.BOND_BONDING &&
-                !device.createBond() &&
                 device.bondState != BluetoothDevice.BOND_BONDED
             ) {
-                throw IOException("createBond() failed")
+                val started = try {
+                    device.createBond()
+                } catch (e: Exception) {
+                    emitSppDiagnostic(
+                        level = "WARNING",
+                        message = "createBond() invocation failed: " +
+                            "${e.javaClass.simpleName}: ${e.message}",
+                        fields = mapOf("address" to device.address),
+                        error = e,
+                    )
+                    false
+                }
+                emitSppDiagnostic(
+                    level = "INFO",
+                    message = "createBond() returned $started; " +
+                        "verifying bond state, currentState=${device.bondState}",
+                    fields = mapOf(
+                        "address" to device.address,
+                        "bondState" to device.bondState,
+                    ),
+                )
             }
-            if (device.bondState == BluetoothDevice.BOND_BONDED) {
-                latch.countDown()
-            }
-            if (!latch.await(15, TimeUnit.SECONDS)) {
-                throw IOException("Bonding timed out")
+
+            // The pairing dialog is user-driven, but the loop above bails via
+            // the generation check, so the deadline only bounds the silent
+            // case where the bond never progresses at all.
+            val deadline = System.currentTimeMillis() + 10_000
+            var sawBonding = false
+            while (latch.count > 0 && System.currentTimeMillis() < deadline) {
+                if (generation != connectGeneration.get()) {
+                    throw IOException("SPP connect was cancelled")
+                }
+                when (device.bondState) {
+                    BluetoothDevice.BOND_BONDED -> latch.countDown()
+                    BluetoothDevice.BOND_BONDING -> sawBonding = true
+                    BluetoothDevice.BOND_NONE -> {
+                        // Right after createBond() the state can still read NONE
+                        // before it flips to BONDING; only fail once bonding was
+                        // observed to have ended without a bond.
+                        if (sawBonding) {
+                            error.compareAndSet(null, IOException("Bonding failed"))
+                            latch.countDown()
+                        }
+                    }
+                }
+                if (latch.count > 0) latch.await(150, TimeUnit.MILLISECONDS)
             }
             error.get()?.let { throw it }
+            if (device.bondState != BluetoothDevice.BOND_BONDED) {
+                throw IOException("Bonding timed out")
+            }
         } finally {
             try {
                 unregisterReceiver(receiver)
@@ -1932,6 +2200,12 @@ class MainActivity : FlutterActivity() {
         wearableLogExecutor.shutdownNow()
         pendingWearableLogResult?.error("CANCELLED", "Activity destroyed", null)
         pendingWearableLogResult = null
+        pendingWearableLogPermissionResult?.error(
+            "CANCELLED",
+            "Activity destroyed while requesting storage permission",
+            null,
+        )
+        pendingWearableLogPermissionResult = null
         pendingBluetoothPermissionResult?.error(
             "CANCELLED",
             "Activity destroyed while requesting Bluetooth permission",

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:oronbox/src/core/logging/diagnostic_event.dart';
 
 class DebugConsole extends StatefulWidget {

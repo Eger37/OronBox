@@ -97,14 +97,6 @@ if(TARGET quickjs_engine_plugin)
     CXX_VISIBILITY_PRESET default)
 endif()
 
-# tray_manager currently calls the legacy libayatana app-indicator constructor.
-# Keep the third-party deprecation from polluting otherwise clean app builds.
-if(TARGET tray_manager_plugin)
-  target_compile_options(tray_manager_plugin PRIVATE
-    -Wno-deprecated-declarations)
-endif()
-
-
 # === Installation ===
 # By default, "installing" just makes a relocatable bundle in the build
 # directory.

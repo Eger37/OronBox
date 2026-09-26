@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class FadeInListItem extends StatelessWidget {
   const FadeInListItem({super.key, required this.index, required this.child});

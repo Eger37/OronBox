@@ -46,7 +46,6 @@ final class WasmRuntime {
     }
 
     final initialization = WasmRunLibrary.setUp(
-      override: false,
       isFlutter: true,
       loadAsset: rootBundle.load,
     );

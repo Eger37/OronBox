@@ -29,6 +29,94 @@ void main() {
     expect(devices[1].authKey, 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb');
   });
 
+  test(
+    'extracts camelCase device snapshots with a redacted address suffix',
+    () {
+      const log = '''
+2026-09-24|I|RRLog|
+{
+  "deviceInfo": {
+    "device": {
+      "name": "REDMI Watch 5 eSIM",
+      "model": "miwear.watch.o65m",
+      "detail": {
+        "macAddress": null,
+        "mac": "48:B0",
+        "encryptKey": "cccccccccccccccccccccccccccccccc",
+        "sn": "SN3"
+      }
+    }
+  }
+}
+''';
+      final archive = Archive()
+        ..addFile(ArchiveFile.string('XiaomiFit.main.log', log));
+
+      final devices = extractMiDevicesFromWearableLogZip(
+        ZipEncoder().encode(archive),
+      );
+
+      expect(devices, hasLength(1));
+      expect(devices.single.model, 'miwear.watch.o65m');
+      expect(devices.single.mac, '48:B0');
+      expect(devices.single.authKey, 'cccccccccccccccccccccccccccccccc');
+      expect(devices.single.hasAuthKey, isFalse);
+    },
+  );
+
+  test('resolves a redacted address from companion log records', () {
+    const deviceLog = '''
+{
+  "deviceInfo": {
+    "device": {
+      "name": "REDMI Watch 5 eSIM",
+      "model": "miwear.watch.o65m",
+      "detail": {
+        "mac": "48:B0",
+        "encryptKey": "dddddddddddddddddddddddddddddddd"
+      }
+    }
+  }
+}
+''';
+    const transferLog =
+        'CompanionDeviceManagerApi|isAssociated 3C:AF:B7:FE:48:B0';
+    final archive = Archive()
+      ..addFile(ArchiveFile.string('XiaomiFit.main.log', deviceLog))
+      ..addFile(ArchiveFile.string('Transfer.device.log', transferLog));
+
+    final devices = extractMiDevicesFromWearableLogZip(
+      ZipEncoder().encode(archive),
+    );
+
+    expect(devices, hasLength(1));
+    expect(devices.single.mac, '3C:AF:B7:FE:48:B0');
+    expect(devices.single.hasAuthKey, isTrue);
+  });
+
+  test('resolves a redacted log address only when it is unambiguous', () {
+    const device = MiCloudDevice(
+      name: 'REDMI Watch 5 eSIM',
+      model: 'miwear.watch.o65m',
+      mac: '48:B0',
+      authKey: 'cccccccccccccccccccccccccccccccc',
+      firmwareVersion: '',
+      serialNumber: 'SN3',
+    );
+
+    expect(
+      resolveMiCloudDeviceAddress(device, const ['AA:BB:CC:DD:48:B0']),
+      'AA:BB:CC:DD:48:B0',
+    );
+    expect(
+      resolveMiCloudDeviceAddress(device, const [
+        'AA:BB:CC:DD:48:B0',
+        '11:22:33:44:48:B0',
+      ]),
+      isNull,
+    );
+  });
+
   test('persists and clears the Xiaomi signed session material', () async {
     SharedPreferences.setMockInitialValues({});
     final service = MiAccountService();

@@ -10,6 +10,38 @@ import 'package:oronbox/src/core/wasm/wasm_runtime.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  setUpAll(() async {
+    // `flutter test` does not link native assets into the test VM, so point
+    // the wasm_run FFI at the dynamic library the package build hook fetched
+    // during pub get. `build/native_assets/<os>/` is where the toolchain
+    // publishes hook outputs; the official override is the
+    // WASM_RUN_DART_DYNAMIC_LIBRARY environment variable.
+    final (name, osDir) = switch (true) {
+      _ when Platform.isMacOS => ('libwasm_run_dart.dylib', 'macos'),
+      _ when Platform.isLinux => ('libwasm_run_dart.so', 'linux'),
+      _ when Platform.isWindows => ('wasm_run_dart.dll', 'windows'),
+      _ => ('', ''),
+    };
+    final candidates = [
+      Platform.environment['WASM_RUN_DART_DYNAMIC_LIBRARY'],
+      if (name.isNotEmpty) ...[
+        'build/native_assets/$osDir/$name',
+        '.dart_tool/lib/$name',
+      ],
+    ];
+    final path = candidates.firstWhere(
+      (candidate) => candidate != null && File(candidate).existsSync(),
+      orElse: () => null,
+    );
+    if (path == null) {
+      fail(
+        'wasm_run native library not fetched; run `flutter pub get` and '
+        'any flutter build/test once before the test suite.',
+      );
+    }
+    await WasmRunLibrary.setUp(lib: ExternalLibrary.open(path));
+  });
+
   test('indexed PNG pixels are expanded to RGBA before WebP encoding', () {
     final palette = img.PaletteUint8(2, 4)
       ..setRgba(0, 12, 34, 56, 255)

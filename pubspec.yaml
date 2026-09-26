@@ -34,47 +34,48 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.3
-  go_router: ^17.3.0
-  flutter_riverpod: ^3.3.2
-  url_launcher: ^6.3.1
-  cached_network_image: ^3.4.1
+  go_router: ^18.0.0
+  flutter_riverpod: ^3.4.2
+  url_launcher: ^6.3.2
+  cached_network_image: ^4.0.2
   dynamic_color: ^2.1.0
-  material_ui: ^1.0.1
-  dio: ^5.8.0
+  material_ui: ^1.4.0
+  dio: ^5.11.1
   csv: ^8.0.0
-  html: ^0.15.6
+  html: ^0.15.7
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.8
+  cupertino_icons: ^1.0.9
   freezed_annotation: ^3.1.0
   json_annotation: ^4.12.0
   segmented_list:
     path: packages/segmented_list
   flutter_svg: ^2.3.0
   shared_preferences: ^2.5.5
-  universal_ble: ^2.1.0
-  protobuf: ^6.0.0
+  universal_ble: ^2.3.0
+  protobuf: ^6.1.0
   fixnum: ^1.1.1
   pointycastle: ^4.0.0
-  crypto: ^3.0.6
-  file_picker: ^12.0.0
-  cross_file: ^0.3.5+2
-  archive: ^4.0.6
-  image: ^4.5.4
+  crypto: ^3.0.7
+  file_picker: ^13.1.0
+  # desktop_drop 0.8.x is still coupled to cross_file 0.3.x
+  cross_file: ^0.3.5+5
+  archive: ^4.3.0
+  image: ^4.10.1
   charset: ^2.0.1
   enough_convert: ^1.6.0
   logging: ^1.3.0
   qr_flutter: ^4.1.0
-  app_links: ^7.2.0
+  app_links: ^7.2.1
   path_provider: ^2.1.6
-  desktop_drop: ^0.8.0
+  desktop_drop: ^0.8.4
   window_manager: ^0.5.2
-  tray_manager: ^0.5.3
-  flutter_soloud: ^4.0.12
-  # Keep the prebuilt-library plugin path. wasm_run 0.2 currently emits
-  # dynamic Android libraries with a static `.a` filename under Flutter 3.47.
-  wasm_run_flutter: ^0.1.0
+  tray_manager: ^0.7.0
+  flutter_soloud: ^4.1.7
+  # wasm_run 0.2 publishes dynamic native assets; keep the hook asset name
+  # aligned with the upstream release names for Flutter's native-assets link.
+  wasm_run_flutter: ^0.2.0+1
   quickjs_engine: ^0.1.5
   oronbox_network:
     git:
@@ -82,8 +83,11 @@ dependencies:
       ref: v0.1.3
   web: ^1.1.1
   flutter_markdown_plus: ^1.0.12
-  uuid: ^4.5.3
+  uuid: ^4.6.0
   mdns_dart: ^2.2.2
+  fl_chart: ^1.2.0
+  flutter_timezone: ^5.1.0
+  cupertino_ui: ^1.1.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -94,17 +98,19 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
-  build_runner: ^2.16.0
-  freezed: ^4.0.0
+  build_runner: ^2.16.1
+  freezed: ^4.0.2
   json_serializable: ^6.14.0
 
 dependency_overrides:
-  # wasm_run_flutter 0.1.0 still declares the Freezed 2 annotation constraint,
-  # while its generated bindings remain compatible with the Freezed 3 runtime.
-  freezed_annotation: ^3.1.0
-  # jni 1.0.3 dropped the __ENVP_CAST workaround and fails to compile dartjni
-  # on desktop with recent clang.
-  jni: 1.0.0
+  # wasm_run 0.2.0+2 bindings are generated with flutter_rust_bridge 2.12.0;
+  # newer FRB releases reject them at runtime due to the codegen version.
+  flutter_rust_bridge: 2.12.0
+
+hooks:
+  user_defines:
+    wasm_run:
+      assetName: wasm_run_dart-dynamic-$target
 
 flutter:
   generate: true

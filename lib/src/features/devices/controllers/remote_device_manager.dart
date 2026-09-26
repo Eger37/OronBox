@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -19,6 +20,7 @@ import 'package:oronbox/src/features/devices/controllers/device_manager.dart';
 import 'package:oronbox/src/features/devices/services/xiaomi_screenshot_storage.dart';
 import 'package:oronbox/src/features/devices/services/phone_finder.dart';
 import 'package:oronbox/src/features/devices/health/health_models.dart';
+import 'package:oronbox/src/device/xiaomi/components/health_system.dart';
 import 'package:oronbox/src/features/devices/models/xiaomi_device_features.dart';
 import 'package:oronbox/src/features/devices/controllers/interconnect_event_codec.dart';
 import 'package:oronbox/src/host/application_host_provider.dart';
@@ -831,6 +833,25 @@ class HostDeviceManager extends DeviceManager {
   }
 
   @override
+  Future<XiaomiHealthData> replayXiaomiHealthSnapshot(
+    String deviceId,
+    List<XiaomiActivityRawFile> files,
+  ) async {
+    final result = await _execute(
+      OronBoxCommand(
+        method: 'device.xiaomi.health.snapshot.replay',
+        params: {
+          'deviceId': deviceId,
+          'files': files
+              .map((file) => {'id': file.id, 'data': base64Encode(file.data)})
+              .toList(growable: false),
+        },
+      ),
+    );
+    return XiaomiHealthData.fromJson((result.value as Map).cast());
+  }
+
+  @override
   Future<pb_system.AppLayout> loadXiaomiAppLayout() async {
     final result = await _execute(
       const OronBoxCommand(method: 'device.xiaomi.appLayout.get'),
@@ -1305,11 +1326,16 @@ class HostDeviceManager extends DeviceManager {
   @override
   Future<int> importMiCloudDevices(List<MiCloudDevice> devices) async {
     var imported = 0;
-    for (final device in devices.where((item) => item.hasAuthKey)) {
+    for (final device in devices) {
+      final address = resolveMiCloudDeviceAddress(
+        device,
+        state.pairedDevices.map((item) => item.addr),
+      );
+      if (address == null) continue;
       await importSharedDevice(
         MiWearState(
           name: device.name.trim().isEmpty ? device.model : device.name.trim(),
-          addr: device.mac.trim(),
+          addr: address,
           connectType: ConnectType.spp.name,
           authkey: device.authKey.trim(),
           disconnected: true,

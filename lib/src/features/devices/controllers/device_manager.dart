@@ -6,6 +6,7 @@ import 'package:crypto/crypto.dart' as crypto;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:oronbox/src/core/logging/logging_service.dart';
 import 'package:oronbox/src/core/models/bt_models.dart';
 import 'package:oronbox/src/core/models/sync_models.dart';
@@ -13,6 +14,7 @@ import 'package:oronbox/src/core/models/xiaomi_health_models.dart';
 import 'package:oronbox/src/core/providers/bluetooth_platform_provider.dart';
 import 'package:oronbox/src/core/providers/app_settings_providers.dart';
 import 'package:oronbox/src/core/services/connection_keep_alive.dart';
+import 'package:oronbox/src/core/services/rfcomm_driver.dart';
 import 'package:oronbox/src/core/services/shared_prefs_service.dart';
 import 'package:oronbox/src/core/services/status_surface_bridge.dart';
 import 'package:oronbox/src/device/core/ble_requirement.dart';
@@ -42,6 +44,7 @@ import 'package:oronbox/src/device/xiaomi/components/thirdparty_app_system.dart'
 import 'package:oronbox/src/device/xiaomi/components/sync_system.dart';
 import 'package:oronbox/src/device/xiaomi/components/xiaomi_device_component.dart';
 import 'package:oronbox/src/device/xiaomi/xiaomi_device_factory.dart';
+import 'package:oronbox/src/device/xiaomi/xiaomi_time.dart';
 import 'package:oronbox/src/device/zeppos/systems/zeppos_auth_system.dart';
 import 'package:oronbox/src/device/zeppos/systems/zeppos_apps_system.dart';
 import 'package:oronbox/src/device/zeppos/systems/zeppos_app_install_system.dart';
@@ -597,6 +600,10 @@ abstract class DeviceManager extends Notifier<DeviceManagerState> {
   });
   Future<XiaomiHealthData> loadXiaomiHealthData();
   Future<XiaomiHealthSyncResult> syncXiaomiHealth();
+  Future<XiaomiHealthData> replayXiaomiHealthSnapshot(
+    String deviceId,
+    List<XiaomiActivityRawFile> files,
+  );
   Future<pb_system.AppLayout> loadXiaomiAppLayout();
   Future<void> setXiaomiAppLayout(pb_system.AppLayout_Layout layout);
   Future<List<DeviceRecording>> downloadXiaomiRecordings({
@@ -700,6 +707,7 @@ class LocalDeviceManager extends DeviceManager {
     final sync = XiaomiHealthSyncService(
       system: system,
       deviceId: deviceId,
+      deviceCode: state.currentDevice?.codename,
     ).sync();
     _xiaomiHealthSyncFuture = sync;
     sync.then<void>(
@@ -725,6 +733,32 @@ class LocalDeviceManager extends DeviceManager {
       },
     );
     return sync;
+  }
+
+  @override
+  Future<XiaomiHealthData> replayXiaomiHealthSnapshot(
+    String deviceId,
+    List<XiaomiActivityRawFile> files,
+  ) async {
+    // Replay is a local parser/store operation; it must remain available when
+    // the wearable is offline or another device is currently connected. Use
+    // the live system when it belongs to this snapshot, otherwise create the
+    // stateless parser without touching the transport.
+    final liveSystem = _currentEntity?.id == deviceId
+        ? _currentEntity?.system<XiaomiHealthSystem>()
+        : null;
+    final parser = liveSystem ?? XiaomiHealthSystem();
+    try {
+      return await XiaomiHealthSyncService(
+        system: parser,
+        deviceId: deviceId,
+        deviceCode: _currentEntity?.id == deviceId
+            ? state.currentDevice?.codename
+            : null,
+      ).replayFromRawFiles(files);
+    } finally {
+      if (liveSystem == null) await parser.dispose();
+    }
   }
 
   @override
@@ -920,6 +954,9 @@ class LocalDeviceManager extends DeviceManager {
   final _pooledEntities = <String, DeviceEntity>{};
   final _scannedProfiles = <String, DeviceProfile>{};
   var _connectGeneration = 0;
+  Future<void>? _activeConnectFuture;
+  String? _activeConnectAddress;
+  String? _activeConnectType;
   ConnectType? _pendingConnectType;
   var _passiveReconnectInProgress = false;
 
@@ -1198,7 +1235,7 @@ class LocalDeviceManager extends DeviceManager {
     final retryDelay = isMacOsSpp
         ? _macOsSppConnectRetryDelay
         : _defaultConnectRetryDelay;
-
+    SppBondRemovalFailed? bondRemovalError;
     for (var attempt = 1; attempt <= maxAttempts; attempt++) {
       _throwIfConnectCancelled(generation);
       _log.info(
@@ -1206,7 +1243,7 @@ class LocalDeviceManager extends DeviceManager {
         '$attempt/$maxAttempts to $addr',
       );
       try {
-        final connection = await _bluetooth.connect(
+        final connectFuture = _bluetooth.connect(
           addr,
           name,
           BluetoothConnectOptions(
@@ -1219,6 +1256,13 @@ class LocalDeviceManager extends DeviceManager {
             sppRemoveBond: _removeBondBeforeSpp(),
           ),
         );
+        // The native SPP chain caps every bond/socket stage itself, but a
+        // wedged Bluetooth stack can still hold the method call open past
+        // every poll deadline. Enforce one transport-wide deadline; the
+        // TimeoutException branch below cancels the pending native connect.
+        final connection = connectType == ConnectType.spp
+            ? await connectFuture.timeout(const Duration(seconds: 90))
+            : await connectFuture;
         _log.info(
           '${connectType.name.toUpperCase()} connected on attempt $attempt',
         );
@@ -1228,8 +1272,25 @@ class LocalDeviceManager extends DeviceManager {
         _log.warning(
           '${connectType.name.toUpperCase()} connect attempt $attempt timed out',
         );
+        if (connectType == ConnectType.spp) {
+          // Release the native worker: the cancel increments the generation
+          // so the superseded attempt exits at its next checkpoint and closes
+          // any socket still blocked in BluetoothSocket.connect().
+          try {
+            await _bluetooth.cancelPendingSppConnection().timeout(
+              const Duration(seconds: 2),
+            );
+          } catch (cancelError, cancelStack) {
+            _log.warning(
+              'cancelling timed-out SPP connect failed',
+              cancelError,
+              cancelStack,
+            );
+          }
+        }
         await _resetBluetoothAfterFailedConnect(addr, connectType);
       } catch (e) {
+        if (e is SppBondRemovalFailed) bondRemovalError = e;
         lastError = e is Exception ? e : Exception(e.toString());
         _log.warning(
           '${connectType.name.toUpperCase()} connect attempt $attempt failed: $e',
@@ -1243,7 +1304,8 @@ class LocalDeviceManager extends DeviceManager {
       }
     }
 
-    throw lastError ??
+    throw bondRemovalError ??
+        lastError ??
         Exception(
           '${connectType.name} connect failed after $maxAttempts attempts',
         );
@@ -1285,6 +1347,51 @@ class LocalDeviceManager extends DeviceManager {
     String authKey, {
     DeviceKind kind = DeviceKind.xiaomi,
     String connectType = 'ble',
+  }) {
+    final connectionAddress = formatDeviceAddress(addr).toLowerCase();
+    final connectionType = connectType.toLowerCase();
+    final active = _activeConnectFuture;
+    if (active != null &&
+        _activeConnectAddress == connectionAddress &&
+        _activeConnectType == connectionType) {
+      _log.fine(
+        'joining active $connectionType connection to $connectionAddress',
+      );
+      return active;
+    }
+
+    final connection = _connect(
+      addr,
+      name,
+      authKey,
+      kind: kind,
+      connectType: connectType,
+    );
+    _activeConnectFuture = connection;
+    _activeConnectAddress = connectionAddress;
+    _activeConnectType = connectionType;
+    connection.then<void>(
+      (_) => _clearActiveConnect(connection),
+      onError: (Object error, StackTrace stackTrace) {
+        _clearActiveConnect(connection);
+      },
+    );
+    return connection;
+  }
+
+  void _clearActiveConnect(Future<void> connection) {
+    if (!identical(_activeConnectFuture, connection)) return;
+    _activeConnectFuture = null;
+    _activeConnectAddress = null;
+    _activeConnectType = null;
+  }
+
+  Future<void> _connect(
+    String addr,
+    String name,
+    String authKey, {
+    required DeviceKind kind,
+    required String connectType,
   }) async {
     final generation = ++_connectGeneration;
     final existingDevice = state.pairedDevices
@@ -2035,6 +2142,9 @@ class LocalDeviceManager extends DeviceManager {
 
   @override
   Future<void> disconnect([String? address]) async {
+    _activeConnectFuture = null;
+    _activeConnectAddress = null;
+    _activeConnectType = null;
     _connectGeneration += 1;
     _pendingConnectType = null;
     final current = state.currentDevice;
@@ -2096,6 +2206,9 @@ class LocalDeviceManager extends DeviceManager {
   @override
   Future<void> cancelConnect() async {
     if (!state.connecting) return;
+    _activeConnectFuture = null;
+    _activeConnectAddress = null;
+    _activeConnectType = null;
     _connectGeneration += 1;
     final pendingConnectType = _pendingConnectType;
     _pendingConnectType = null;
@@ -2348,27 +2461,45 @@ class LocalDeviceManager extends DeviceManager {
     }
     final now = DateTime.now();
     final offset = now.timeZoneOffset;
-    final adjusted = now.add(const Duration(hours: 4));
+    // Xiaomi's own TimeSyncer sends `TimeZone.getDefault().getID()`, an IANA
+    // identifier. Firmwares that cannot resolve the identifier (for example
+    // when only an ambiguous abbreviation such as "CST" is sent) fall back to
+    // UTC, which is why the wearable displayed UTC. Dart only exposes the
+    // abbreviation, so resolve the IANA identifier through the platform.
+    final timeZoneId = await _xiaomiTimeZoneId(now, offset);
     await system.syncTime(
       TimeSyncProps(
-        date: SyncDate(
-          year: adjusted.year,
-          month: adjusted.month,
-          day: adjusted.day,
-        ),
+        date: SyncDate(year: now.year, month: now.month, day: now.day),
         time: SyncTime(
-          hour: adjusted.hour,
-          minute: adjusted.minute,
-          second: adjusted.second,
-          millisecond: adjusted.millisecond,
+          hour: now.hour,
+          minute: now.minute,
+          second: now.second,
+          millisecond: now.millisecond,
         ),
         timezone: SyncTimeZone(
+          // DateTime's offset already includes any active daylight saving.
           offset: offset.inMinutes ~/ 15,
           dstOffset: 0,
-          id: now.timeZoneName,
+          id: timeZoneId,
         ),
+        is12HourFormat: !PlatformDispatcher.instance.alwaysUse24HourFormat,
       ),
     );
+  }
+
+  Future<String> _xiaomiTimeZoneId(DateTime now, Duration offset) async {
+    try {
+      final info = await FlutterTimezone.getLocalTimezone();
+      final id = info.identifier.trim();
+      if (id.isNotEmpty) return id;
+    } catch (error, stackTrace) {
+      _log.fine(
+        'platform timezone identifier unavailable; using offset fallback',
+        error,
+        stackTrace,
+      );
+    }
+    return xiaomiTimeZoneId(now.timeZoneName, offset);
   }
 
   @override
@@ -4009,7 +4140,22 @@ class LocalDeviceManager extends DeviceManager {
 
   @override
   Future<int> importMiCloudDevices(List<MiCloudDevice> devices) async {
-    final importable = devices.where((device) => device.hasAuthKey).toList();
+    final importable = [
+      for (final device in devices)
+        if (resolveMiCloudDeviceAddress(
+              device,
+              state.pairedDevices.map((item) => item.addr),
+            )
+            case final address?)
+          MiCloudDevice(
+            name: device.name,
+            model: device.model,
+            mac: address,
+            authKey: device.authKey,
+            firmwareVersion: device.firmwareVersion,
+            serialNumber: device.serialNumber,
+          ),
+    ];
     _log.info(
       'importing ${importable.length}/${devices.length} Mi Cloud devices',
     );
