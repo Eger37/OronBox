@@ -1,0 +1,69 @@
+name: Windows build (manual)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  FLUTTER_VERSION: 3.47.5
+  ORONBOX_RETRY_ATTEMPTS: 3
+  ORONBOX_RETRY_DELAY_SECONDS: 10
+
+jobs:
+  build-windows:
+    name: Build Windows
+    runs-on: windows-2022
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        shell: pwsh
+        run: |
+          for ($attempt = 1; $attempt -le [int]$env:ORONBOX_RETRY_ATTEMPTS; $attempt++) {
+            flutter pub get --enforce-lockfile
+            if ($LASTEXITCODE -eq 0) { exit 0 }
+            if ($attempt -lt [int]$env:ORONBOX_RETRY_ATTEMPTS) {
+              Start-Sleep -Seconds ([int]$env:ORONBOX_RETRY_DELAY_SECONDS * $attempt)
+            }
+          }
+          exit 1
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          for ($attempt = 1; $attempt -le [int]$env:ORONBOX_RETRY_ATTEMPTS; $attempt++) {
+            choco install innosetup --no-progress -y
+            if ($LASTEXITCODE -eq 0) { exit 0 }
+            if ($attempt -lt [int]$env:ORONBOX_RETRY_ATTEMPTS) {
+              Start-Sleep -Seconds ([int]$env:ORONBOX_RETRY_DELAY_SECONDS * $attempt)
+            }
+          }
+          exit 1
+
+      - name: Build Windows package
+        shell: pwsh
+        run: |
+          for ($attempt = 1; $attempt -le [int]$env:ORONBOX_RETRY_ATTEMPTS; $attempt++) {
+            ./tool/build_windows.ps1
+            if ($LASTEXITCODE -eq 0) { exit 0 }
+            if ($attempt -lt [int]$env:ORONBOX_RETRY_ATTEMPTS) {
+              Start-Sleep -Seconds ([int]$env:ORONBOX_RETRY_DELAY_SECONDS * $attempt)
+            }
+          }
+          exit 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages-windows
+          path: build/release/*
+          if-no-files-found: error
+          retention-days: 7
